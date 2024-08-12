@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # RoomieFinderApp
 RoomieFinder an app designed to help users find roommates for rental apartments with ease and efficiency
 =======
@@ -24,4 +24,4 @@ Prerequisites
 Node.js
 npm or yarn
 Expo CLI (npm install -g expo-cli)
->>>>>>> 5ba1e68 (Initial commit)
+
