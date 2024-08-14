@@ -255,7 +255,7 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#e6e8e4',
   },
   loadingContainer: {
     flex: 1,

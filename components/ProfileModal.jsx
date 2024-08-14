@@ -9,6 +9,8 @@ import {
   ScrollView,
   Image,
   Alert,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { Ionicons, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -68,6 +70,7 @@ const ProfileModal = ({ onClose, isModalVisible, profile }) => {
       onRequestClose={onClose}
       animationType="slide"
     >
+      <StatusBar barStyle="dark-content" />
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -131,7 +134,11 @@ const ProfileModal = ({ onClose, isModalVisible, profile }) => {
                 <Text style={styles.apartmentHeading}>Apartment Details</Text>
                 <InfoRow
                   IconComponent={Ionicons}
-                  iconProps={{ name: 'home-outline', size: 24, color: 'gray' }}
+                  iconProps={{
+                    name: 'home-outline',
+                    size: 24,
+                    color: 'gray',
+                  }}
                   text={apartmentData.city}
                 />
                 <InfoRow
@@ -159,7 +166,11 @@ const ProfileModal = ({ onClose, isModalVisible, profile }) => {
                 />
                 <InfoRow
                   IconComponent={Ionicons}
-                  iconProps={{ name: 'cash-outline', size: 24, color: 'gray' }}
+                  iconProps={{
+                    name: 'cash-outline',
+                    size: 24,
+                    color: 'gray',
+                  }}
                   text={`Rent: ₪${apartmentData.rentPrice}`}
                 />
                 {apartmentData.description && (
@@ -252,9 +263,11 @@ const ProfileModal = ({ onClose, isModalVisible, profile }) => {
               </>
             )}
           </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
+          <View style={{ paddingBottom: 25 }}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -294,28 +307,20 @@ const InfoRow = ({ IconComponent, iconProps, text }) => (
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'white', // Set the background color to white
   },
   modalContent: {
-    width: width * 0.9,
-    height: height * 0.7,
+    flex: 1, // Make sure the content takes up the full screen
     padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
-  scrollContainer: {},
+  scrollContainer: {
+    paddingTop: 30,
+  },
   profileImage: {
     width: width * 0.8,
     height: height * 0.3,
     borderRadius: 17,
+    alignSelf: 'center', // Center the image horizontally
   },
   apartmentImage: {
     width: width * 0.8,
@@ -347,12 +352,13 @@ const styles = StyleSheet.create({
   profileName: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: 24,
+    textAlign: 'center', // Center the text horizontally
   },
   profileInfoContainer: {
     alignItems: 'center',
     marginBottom: 20,
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center', // Center the content horizontally
   },
   infoRow: {
     flexDirection: 'row',
@@ -392,11 +398,13 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 20,
+    alignSelf: 'center', // Center the close button horizontally
   },
   closeButtonText: {
     color: '#ff6b6b',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-SemiBold',
   },
   aboutMeText: { fontFamily: 'Poppins-Bold', marginBottom: 10 },
   introduceYourselfText: {

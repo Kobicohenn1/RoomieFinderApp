@@ -5,13 +5,10 @@ import {
   ScrollView,
   Button,
   StyleSheet,
-  FlatList,
-  TouchableOpacity,
   Alert,
   Platform,
 } from 'react-native';
 import Input from './Input';
-import { CITIES } from '../../constants/cities';
 import Counter from '../Counter';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import SelectableIcon from '../SelectableIcon';
@@ -20,11 +17,11 @@ import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ImageComponent from './ImageComponent';
+import CitySelector from '../CitySelector'; // Import the CitySelector component
 
 const ApartmentForm = () => {
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [filteredCities, setFilteredCities] = useState([]);
+  const [city, setCity] = useState(''); // Removed filteredCities state
   const [numberOfRooms, setNumberOfRooms] = useState(0);
   const [numberOfPeople, setNumberOfPeople] = useState({ female: 0, male: 0 });
   const [rentPrice, setRentPrice] = useState('');
@@ -98,18 +95,6 @@ const ApartmentForm = () => {
     fetchUserData();
   }, []);
 
-  const handleCityChange = (text) => {
-    setCity(text);
-    if (text === '') {
-      setFilteredCities([]);
-    } else {
-      const filteredCities = CITIES.filter((city) =>
-        city.toLowerCase().startsWith(text.toLowerCase())
-      );
-      setFilteredCities(filteredCities);
-    }
-  };
-
   const handleRemoveImage = async (index, imageName) => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -136,11 +121,6 @@ const ApartmentForm = () => {
       console.error('Error deleting image', error.message);
       Alert.alert('Error', 'Failed to delete image');
     }
-  };
-
-  const handleCitySelect = (item) => {
-    setCity(item);
-    setFilteredCities([]);
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -217,11 +197,6 @@ const ApartmentForm = () => {
     }
   };
 
-  const showHouseRules = () => {
-    console.log(houseRules);
-    console.log(houseRules.petFriendly);
-  };
-
   const handleSubmit = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -265,28 +240,9 @@ const ApartmentForm = () => {
     <ScrollView>
       <View>
         <Text style={styles.title}>Apartment Details</Text>
-        <Input
-          label="City *"
-          textInputConfig={{
-            value: city,
-            onChangeText: handleCityChange,
-            placeholder: 'Enter City',
-            autoCapitalize: 'words',
-          }}
-        />
-        {filteredCities.length > 0 && (
-          <ScrollView horizontal={true} style={{ width: '100%' }}>
-            <FlatList
-              data={filteredCities}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => handleCitySelect(item)}>
-                  <Text>{item}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </ScrollView>
-        )}
+
+        <CitySelector label="City *" city={city} onCityChange={setCity} />
+
         <Input
           label="Address *"
           textInputConfig={{

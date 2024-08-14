@@ -18,6 +18,7 @@ import pet_friendly from '../assets/icons/pet_friendly.png';
 import have_home from '../assets/icons/have-home.png';
 import smoking_allowed from '../assets/icons/smoking_allowed.png';
 import pet_not_allowed from '../assets/icons/pet_not_allowed.png';
+import filter_icon from '../assets/icons/filter_icon.svg';
 
 export default {
   play,
@@ -40,4 +41,5 @@ export default {
   have_home,
   smoking_allowed,
   pet_not_allowed,
+  filter_icon,
 };

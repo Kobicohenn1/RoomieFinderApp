@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   signInContainer: {
     flex: 1,
     padding: 20,
-    paddingTop: 200, // Adjust this value as needed based on your design
+    paddingTop: 200,
   },
   signInText: {
     fontSize: 24,

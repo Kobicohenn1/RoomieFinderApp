@@ -9,9 +9,11 @@ import {
 } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import axios from 'axios';
-import ProfileCard from '../../components/ProfileCard';
+import ProfileCard from '../../../components/ProfileCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ProfileModal from '../../components/ProfileModal';
+import ProfileModal from '../../../components/ProfileModal';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 const { width } = Dimensions.get('screen');
 
 const Home = () => {
@@ -20,6 +22,8 @@ const Home = () => {
   const [loggedUserId, setLoggedUserId] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -60,41 +64,42 @@ const Home = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Swiper
-        cards={filterdProfiles}
-        renderCard={(profile) => (
-          <TouchableOpacity onPress={() => handleCardPress(profile)}>
-            <ProfileCard profile={profile} />
-          </TouchableOpacity>
-        )}
-        onSwipedAll={() => console.log('No more profiles')}
-        cardIndex={0}
-        backgroundColor={'#f5f5f5'}
-        stackSize={3}
-        cardHorizontalMargin={width / 10} // Remove extra margin
-        cardVerticalMargin={width / 5}
-        containerStyle={styles.swiperContainer}
-      />
-      {selectedProfile && (
-        <ProfileModal
-          isModalVisible={isModalVisible}
-          onClose={closeModal}
-          profile={selectedProfile}
+    <>
+      <View style={styles.container}>
+        <Swiper
+          cards={filterdProfiles}
+          renderCard={(profile) => (
+            <TouchableOpacity onPress={() => handleCardPress(profile)}>
+              <ProfileCard profile={profile} />
+            </TouchableOpacity>
+          )}
+          onSwipedAll={() => console.log('No more profiles')}
+          cardIndex={0}
+          backgroundColor={'#f5f5f5'}
+          stackSize={3}
+          cardHorizontalMargin={width / 10} // Remove extra margin
+          cardVerticalMargin={width / 5}
+          containerStyle={styles.swiperContainer}
         />
-      )}
-    </View>
+        {selectedProfile && (
+          <ProfileModal
+            isModalVisible={isModalVisible}
+            onClose={closeModal}
+            profile={selectedProfile}
+          />
+        )}
+      </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderTopRightRadius: 20,
   },
   swiperContainer: {
-    // width: width * 0.8, // Set the width to 80% of the screen width
+    backgroundColor: '#e6e8e4',
     flexGrow: 0, // Prevent the Swiper from growing to take up all available space
   },
   swiperStyles: {},

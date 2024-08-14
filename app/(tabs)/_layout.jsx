@@ -9,6 +9,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
       <Image
         source={icon}
         resizeMode="contain"
+        tintColor="gray"
         style={{ width: 25, height: 25 }}
       />
       <Text
@@ -30,8 +31,7 @@ const TabsLayout = () => {
         tabBarActiveTintColor: '#FFA001',
         tabBarInactiveTintColor: '#CDCDE0',
         tabBarStyle: {
-          backgroundColor: '#161622',
-          borderTopWidth: 1,
+          backgroundColor: '#e6e8e4',
           borderTopColor: '#232533',
           height: 84,
         },
