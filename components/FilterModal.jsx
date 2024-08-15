@@ -1,17 +1,107 @@
-import React, { useState } from 'react';
-import { View, Text, Modal, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Modal, StyleSheet, Alert } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import CitySelector from './CitySelector';
 import OptionButtons from './OptionButtons';
 import Slider from './Slider';
 import CustomButton from './CustomButton';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+
+const DEFAULT_GENDER = 'All';
+const DEFAULT_AGE_RANGE = [18, 35];
+const DEFAULT_PRICING_RANGE = [500, 3000];
+const DEFAULT_SHARING_OPTION = 'Any';
 
 const FilterModal = ({ isVisible, onClose }) => {
   const [city, setCity] = useState('');
-  const [gender, setGender] = useState('Female');
-  const [ageRange, setAgeRange] = useState([18, 25]);
-  const [pricingRange, setPricingRange] = useState([500, 2000]);
-  const [sharingOption, setSharingOption] = useState('Any');
+  const [gender, setGender] = useState(DEFAULT_GENDER);
+  const [ageRange, setAgeRange] = useState(() => DEFAULT_AGE_RANGE);
+  const [pricingRange, setPricingRange] = useState(() => DEFAULT_PRICING_RANGE);
+  const [sharingOption, setSharingOption] = useState(DEFAULT_SHARING_OPTION);
+
+  useEffect(() => {
+    const fetchFilterData = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        const token = await AsyncStorage.getItem('token');
+        if (!userId || !token) {
+          Alert.alert('Error', 'Authentication Error');
+          return;
+        }
+        const userResponse = await axios.get(
+          `http://192.168.10.10:3500/api/users/${userId}`,
+          {
+            headers: {
+              'x-auth-token': token,
+            },
+          }
+        );
+
+        if (userResponse.data.filters) {
+          const filterResponse = await axios.get(
+            `http://192.168.10.10:3500/api/filters/${userResponse.data.filters}`,
+            {
+              headers: {
+                'x-auth-token': token,
+              },
+            }
+          );
+
+          populateFilterData(filterResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching filter data', error.message);
+        Alert.alert('Error', 'Failed to fetch filter data');
+      }
+    };
+    fetchFilterData();
+  }, []);
+
+  const handleFilterSaved = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const token = await AsyncStorage.getItem('token');
+      if (!userId || !token) {
+        Alert.alert('Auth Error');
+        return;
+      }
+      const filterData = {
+        city,
+        gender,
+        ageRange,
+        pricingRange,
+        sharingOption,
+      };
+
+      const response = await axios.post(
+        `http://192.168.10.10:3500/api/filters/upload`,
+        filterData,
+        {
+          headers: {
+            'x-auth-token': token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        Alert.alert('Success', 'Filters saved successfully');
+        onClose();
+      } else {
+        Alert.alert('Error', 'Faild to save filters');
+      }
+    } catch (error) {
+      console.error('Error update filter', error.message);
+      Alert.alert('Error', 'Server Error');
+    }
+  };
+
+  const populateFilterData = (data) => {
+    setGender(data.gender || DEFAULT_GENDER);
+    setAgeRange(data.ageRange || DEFAULT_AGE_RANGE);
+    setPricingRange(data.pricingRange || DEFAULT_PRICING_RANGE);
+    setSharingOption(data.sharingOption || DEFAULT_SHARING_OPTION);
+    setCity(data.city || '');
+  };
 
   return (
     <Modal visible={isVisible} animationType="slide" onRequestClose={onClose}>
@@ -73,7 +163,7 @@ const FilterModal = ({ isVisible, onClose }) => {
             />
             <CustomButton
               title="Apply Filter"
-              handlePress={onClose}
+              handlePress={handleFilterSaved}
               containerStyle={styles.applyButton}
               textStyle={styles.applyText}
             />

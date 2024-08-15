@@ -80,6 +80,10 @@ const UserSchema = new Schema(
       type: Schema.ObjectId,
       ref: 'Apartment',
     },
+    filters: {
+      type: Schema.ObjectId,
+      ref: 'Filters',
+    },
   },
   { timestamps: true }
 );

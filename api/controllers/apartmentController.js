@@ -50,9 +50,9 @@ exports.getApartmentData = async (req, res) => {
     const { id } = req.params;
     const apartment = await Apartment.findById(id);
     if (!apartment) {
-      res.status(404).json({ msg: 'apartment not found' });
+      return res.status(404).json({ msg: 'apartment not found' });
     }
-    res.json(apartment);
+    return res.json(apartment);
   } catch (error) {
     console.log('Error fetch user', error.message);
     res.status(500).json({ msg: 'Server Error' });
