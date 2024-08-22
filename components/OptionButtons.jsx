@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-const OptionButtons = ({ options, selectedOption, onSelect }) => {
+const OptionButtons = ({ options, selectedOptions, onSelect }) => {
   return (
     <View style={styles.optionContainer}>
       {options.map((option) => (
@@ -9,14 +9,14 @@ const OptionButtons = ({ options, selectedOption, onSelect }) => {
           key={option}
           style={[
             styles.optionButton,
-            selectedOption === option && styles.selectedOption,
+            selectedOptions.includes(option) && styles.selectedOption,
           ]}
           onPress={() => onSelect(option)}
         >
           <Text
             style={[
               styles.optionText,
-              selectedOption === option && styles.selectedOptionText,
+              selectedOptions.includes(option) && styles.selectedOptionText,
             ]}
           >
             {option}
@@ -30,6 +30,7 @@ const OptionButtons = ({ options, selectedOption, onSelect }) => {
 const styles = StyleSheet.create({
   optionContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 15,
   },
@@ -41,6 +42,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginHorizontal: 5,
+    marginBottom: 10, // Adjusted to handle multiple rows
   },
   optionText: {
     fontFamily: 'Poppins-Medium',

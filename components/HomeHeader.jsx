@@ -7,36 +7,85 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import OptionsModal from './OptionsModal';
 import { images } from '../constants';
 import FilterModal from './FilterModal';
+import BugReportModal from './BugReportModal';
 
 const { height } = Dimensions.get('screen');
 
-const HomeHeader = ({ onClose }) => {
+const HomeHeader = ({ onClose, onFiltersApplied, onNavigateToPreference }) => {
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
+  const [isBugReportModalVisible, setIsBugReportModalVisible] = useState(false);
 
-  const handleCloseModal = () => {
+  const handleOpenOptionsModal = () => {
+    setIsOptionsModalVisible(true);
+  };
+
+  const handleCloseOptionsModal = () => {
+    setIsOptionsModalVisible(false);
+  };
+
+  const handleOpenFilterModal = () => {
+    handleCloseOptionsModal();
+    setIsFilterModalVisible(true);
+  };
+
+  const handleCloseFilterModal = () => {
     setIsFilterModalVisible(false);
+  };
+  const handleOpenBugReportModal = () => {
+    handleCloseOptionsModal();
+    setIsBugReportModalVisible(true);
+  };
+
+  const handleCloseBugReportModal = () => {
+    setIsBugReportModalVisible(false);
   };
   return (
     <View style={styles.headerContainer}>
       <Image style={styles.logo} source={images.logo} />
       <Text style={styles.title}>Find Your Next Roomate...</Text>
       <View style={styles.iconContainer}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => {}}>
-          <Ionicons name="notifications-outline" size={28} color="black" />
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => setIsFilterModalVisible(true)}
+          onPress={onNavigateToPreference}
         >
           <Ionicons name="options-outline" size={28} color="black" />
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handleOpenOptionsModal}
+        >
+          <MaterialCommunityIcons
+            name="dots-vertical"
+            size={28}
+            color="black"
+          />
+        </TouchableOpacity>
       </View>
+      {/* Options Modal */}
+      <OptionsModal
+        isVisible={isOptionsModalVisible}
+        onClose={handleCloseOptionsModal}
+        onOpenFilterModal={() => {
+          onNavigateToPreference();
+          handleCloseOptionsModal();
+        }}
+        onOpenBugReportModal={handleOpenBugReportModal}
+      />
+      {/* Filter Modal */}
       <FilterModal
         isVisible={isFilterModalVisible}
-        onClose={handleCloseModal}
+        onClose={handleCloseFilterModal}
+        onFiltersApplied={onFiltersApplied}
+      />
+      {/* Bug Report Modal */}
+      <BugReportModal
+        isVisible={isBugReportModalVisible}
+        onClose={handleCloseBugReportModal}
       />
     </View>
   );

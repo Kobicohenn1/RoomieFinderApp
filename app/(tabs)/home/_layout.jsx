@@ -17,22 +17,14 @@ export default function HomeLayout() {
         <Stack.Screen
           name="index"
           options={{
-            title: 'Find Your Next Roommate',
-            headerStyle: {
-              height: 10,
-              backgroundColor: 'red',
-              elevation: 0, // Remove shadow on Android
-              shadowOpacity: 0, // Remove shadow on iOS
-              borderBottomWidth: 0, // Remove bottom border
-            },
-            headerShadowVisible: false,
-            headerTintColor: '#fff', // Text color in the header
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-            header: () => <HomeHeader />,
+            header: () => null,
           }}
         />
+        <Stack.Screen
+          name="preferenceSelection"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="filter" options={{ headerShown: false }} />
       </Stack>
     </>
   );

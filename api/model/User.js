@@ -72,6 +72,16 @@ const UserSchema = new Schema(
     city: {
       type: String,
     },
+    smokingHabit: {
+      type: String,
+      enum: ['Yes', 'No', 'Outside Only'],
+      default: 'No',
+    },
+    pets: {
+      type: String,
+      enum: ['Dog', 'Cat', 'Others', 'No Pets'],
+      default: 'No Pets',
+    },
     hasApartment: {
       type: Boolean,
       default: false,
@@ -79,6 +89,11 @@ const UserSchema = new Schema(
     apartment: {
       type: Schema.ObjectId,
       ref: 'Apartment',
+    },
+    lookingFor: {
+      type: String,
+      enum: ['Room', 'Roommate'], // Add more options if needed
+      default: 'Roommate',
     },
     filters: {
       type: Schema.ObjectId,

@@ -1,19 +1,22 @@
+import React, { useState } from 'react';
 import {
   View,
   Text,
   Image,
   StyleSheet,
   Dimensions,
-  Touchable,
+  TouchableOpacity,
 } from 'react-native';
-import React from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { icons } from '../constants';
+import { MaterialIcons } from '@expo/vector-icons';
+import ReportModal from './ReportModal';
 
 export const profileCardWidth = Dimensions.get('screen').width * 0.8;
 
 const ProfileCard = ({ profile }) => {
-  //if (!profile) return null;//
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <View style={styles.card}>
       <Image
@@ -26,6 +29,12 @@ const ProfileCard = ({ profile }) => {
         colors={['transparent', 'rgba(0,0,0,0.8)']}
         style={[StyleSheet.absoluteFillObject, styles.overlay]}
       />
+      <TouchableOpacity
+        style={styles.reportButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <MaterialIcons name="report" size={24} color="red" />
+      </TouchableOpacity>
       <View style={styles.footer}>
         <Text style={styles.name}>
           {profile.username}
@@ -41,6 +50,12 @@ const ProfileCard = ({ profile }) => {
           ) : null}
         </View>
       </View>
+
+      <ReportModal
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        profile={profile}
+      />
     </View>
   );
 };
@@ -59,7 +74,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
     justifyContent: 'flex-end',
-
     elevation: 4,
   },
   image: {
@@ -108,6 +122,15 @@ const styles = StyleSheet.create({
   },
   haveHomeText: {
     marginLeft: 5,
+  },
+  reportButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 5,
+    zIndex: 10,
   },
 });
 

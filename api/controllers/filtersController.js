@@ -11,12 +11,13 @@ exports.uploadFiltersDetails = async (req, res) => {
 
     let filter;
 
-    //Check if user already has a filter associated
+    // Check if user already has a filter associated
     if (!user.filters) {
-      //Create a new Filter and associate it to the user
+      // Create a new Filter and associate it to the user
       filter = new Filter({
         user: user._id,
-        ...req.body,
+        roommateFilters: req.body.roommateFilters, // Ensure structure matches
+        roomFilters: req.body.roomFilters, // Ensure structure matches
       });
       await filter.save();
 
@@ -27,15 +28,17 @@ exports.uploadFiltersDetails = async (req, res) => {
         .status(200)
         .json({ msg: 'Upload Filters details successfully' });
     } else {
-      //if user already have a filter
+      // If user already has a filter
       filter = await Filter.findById(user.filters);
       if (!filter) {
         return res.status(404).json({ msg: 'Filter Not Found' });
       }
 
-      //update the filter details
-      Object.assign(filter, req.body);
+      // Update the filter details
+      filter.roommateFilters = req.body.roommateFilters;
+      filter.roomFilters = req.body.roomFilters;
       await filter.save();
+
       return res.status(200).json({ msg: 'Updated Filter Successfully' });
     }
   } catch (error) {

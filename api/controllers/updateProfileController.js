@@ -1,15 +1,9 @@
 const User = require('../model/User'); // Ensure the correct path to your User model
 
 // Update user profile
+// Update user profile
 exports.updateProfile = async (req, res) => {
   const { userId, updates } = req.body;
-
-  console.log('Request Body:', req.body);
-
-  // Validate input
-  if (!userId || !updates) {
-    return res.status(400).json({ msg: 'Invalid input' });
-  }
 
   try {
     // Find user by ID
@@ -17,12 +11,6 @@ exports.updateProfile = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
-    }
-
-    //console.log('Before update:', user); // Log before update
-    console.log('Updates received:', updates); // Log the updates object
-    if (!updates) {
-      console.log('ehyy');
     }
 
     // Specific updates for each field
@@ -39,12 +27,14 @@ exports.updateProfile = async (req, res) => {
       user.movieGenres = updates.movieGenres;
     if (updates.city !== undefined) user.city = updates.city;
     if (updates.age !== undefined) user.age = updates.age;
-    if (updates.hasApartmentUpdates !== undefined)
-      user.hasApartment = !updates.hasApartmentUpdates;
+    if (updates.smokingHabit !== undefined)
+      user.smokingHabit = updates.smokingHabit; // New field
+    if (updates.pets !== undefined) user.pets = updates.pets; // New field
+
+    if (updates.lookingFor !== undefined) user.lookingFor = updates.lookingFor;
+
     // Save the updated user profile
     await user.save();
-
-    console.log('After update:', user); // Log after update
 
     res.json({ msg: 'Profile updated successfully', user });
   } catch (error) {

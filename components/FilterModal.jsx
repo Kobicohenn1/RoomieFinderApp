@@ -13,7 +13,7 @@ const DEFAULT_AGE_RANGE = [18, 35];
 const DEFAULT_PRICING_RANGE = [500, 3000];
 const DEFAULT_SHARING_OPTION = 'Any';
 
-const FilterModal = ({ isVisible, onClose }) => {
+const FilterModal = ({ isVisible, onClose, onFiltersApplied }) => {
   const [city, setCity] = useState('');
   const [gender, setGender] = useState(DEFAULT_GENDER);
   const [ageRange, setAgeRange] = useState(() => DEFAULT_AGE_RANGE);
@@ -85,6 +85,7 @@ const FilterModal = ({ isVisible, onClose }) => {
       );
       if (response.status === 200) {
         Alert.alert('Success', 'Filters saved successfully');
+        onFiltersApplied();
         onClose();
       } else {
         Alert.alert('Error', 'Faild to save filters');

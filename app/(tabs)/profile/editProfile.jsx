@@ -20,6 +20,8 @@ const options = {
   occupation: ['Study', 'Work', 'Both'],
   personality: ['Introvert', 'Extrovert', 'Ambivert'],
   lifestyle: ['Active', 'Relaxed', 'Balanced'],
+  smokingHabit: ['Yes', 'No', 'Outside Only'],
+  pets: ['Dog', 'Cat', 'Others', 'No Pets'],
   music: [
     'Pop',
     'Rock',
@@ -41,6 +43,8 @@ const EditProfileScreen = () => {
     occupation: '',
     personality: '',
     lifestyle: '',
+    smokingHabit: '',
+    pets: '',
     music: [],
     sports: [],
     movieGenres: [],
@@ -73,6 +77,8 @@ const EditProfileScreen = () => {
           occupation: data.occupation || '',
           personality: data.personality || '',
           lifestyle: data.lifestyle || '',
+          smokingHabit: data.smokingHabit || '', // New field
+          pets: data.pets || '', // New field
           music: data.music || [],
           sports: data.sports || [],
           movieGenres: data.movieGenres || [],
@@ -95,6 +101,8 @@ const EditProfileScreen = () => {
       occupation: profile.occupation,
       personality: profile.personality,
       lifestyle: profile.lifestyle,
+      smokingHabit: profile.smokingHabit, // New field
+      pets: profile.pets, // New field
       introduceYourself: introduceYourself,
       music: profile.music,
       sports: profile.sports,
@@ -102,8 +110,6 @@ const EditProfileScreen = () => {
       city: profile.city,
       age: profile.age,
     };
-
-    console.log('Updates to be sent:', updates); // Log the updates object
 
     try {
       const userId = await AsyncStorage.getItem('userId');
@@ -213,6 +219,22 @@ const EditProfileScreen = () => {
               </View>
             </View>
           ))}
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Smoking Habit</Text>
+            <View style={styles.radioContainer}>
+              {options.smokingHabit.map((opt) =>
+                renderOption('smokingHabit', opt)
+              )}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Do You Have Pets?</Text>
+            <View style={styles.radioContainer}>
+              {options.pets.map((opt) => renderOption('pets', opt))}
+            </View>
+          </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>City</Text>

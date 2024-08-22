@@ -24,6 +24,7 @@ app.use('/api/profile', require('./routes/update-profile'));
 app.use('/api', require('./routes/profiles'));
 app.use('/api/apartment', require('./routes/apartmentRoutes'));
 app.use('/api/filters', require('./routes/filtersRoutes'));
+app.use('/api', require('./routes/reportRoutes'));
 
 mongoose.connection.once('open', () => {
   console.log('Connected To MongoDB');
