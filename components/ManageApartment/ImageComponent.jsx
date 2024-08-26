@@ -15,10 +15,11 @@ const styles = StyleSheet.create({
   imageContainer: {
     position: 'relative',
     margin: 5,
+    flexDirection: 'row',
   },
   image: {
-    width: 100,
-    height: 100,
+    width: 126,
+    height: 150,
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 5,

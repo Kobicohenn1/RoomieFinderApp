@@ -24,7 +24,7 @@ const Counter = ({ label, value, onIncrement, onDecrement, noBorder }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 10,
     borderBottomWidth: 1,
     borderColor: '#ccc',
     alignItems: 'center',
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   button: {
-    backgroundColor: '#E0F7FA',
+    backgroundColor: '#21b78a',
     borderRadius: 50,
     width: 30,
     height: 30,
@@ -49,14 +49,14 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 20,
-    color: '#00796B',
+    color: 'white',
   },
   value: {
     marginHorizontal: 20,
     fontSize: 18,
   },
   noBorderContainer: {
-    marginBottom: 20,
+    marginBottom: 5,
     alignItems: 'center',
   },
 });

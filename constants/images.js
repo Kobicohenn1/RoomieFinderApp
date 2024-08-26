@@ -8,6 +8,14 @@ import empty from '../assets/images/empty.png';
 import opening from '../assets/images/opening.png';
 import background from '../assets/images/background.png';
 import signin from '../assets/images/signin.png';
+import house_moving from '../assets/images/house_moving_concept.png';
+import house_filter from '../assets/images/house_filter.png';
+import car_rent from '../assets/images/car_rent.png';
+import stuff_sale from '../assets/images/stuff_sale.png';
+import moving_company from '../assets/images/moving_company.png';
+import contract from '../assets/images/contract.png';
+import student from '../assets/images/student.png';
+import storage_sol from '../assets/images/storage_sol.png';
 
 export default {
   profile,
@@ -20,4 +28,12 @@ export default {
   opening,
   background,
   signin,
+  house_moving,
+  house_filter,
+  car_rent,
+  stuff_sale,
+  moving_company,
+  contract,
+  student,
+  storage_sol,
 };

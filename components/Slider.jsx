@@ -12,7 +12,7 @@ const Slider = ({ label, range, min, max, step, onValuesChange }) => {
         max={max}
         step={step}
         onValuesChange={onValuesChange}
-        selectedStyle={{ backgroundColor: '#4CAF50' }}
+        selectedStyle={{ backgroundColor: '#21b78a' }}
         markerStyle={styles.sliderMarker}
         trackStyle={styles.sliderTrack}
         sliderLength={250}
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     height: 25,
     width: 25,
     borderRadius: 12.5,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#21b78a',
   },
   sliderTrack: {
     height: 8,

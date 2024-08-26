@@ -26,11 +26,9 @@ const styles = StyleSheet.create({
   selectedIcon: {
     opacity: 1,
     borderRadius: 6,
+    tintColor: '#21b78a',
+    shadowColor: '#21b78a',
 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.6,
-    shadowRadius: 1,
     elevation: 10,
   },
 });

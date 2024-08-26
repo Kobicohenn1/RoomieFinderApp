@@ -59,9 +59,7 @@ const CitySelector = ({ label, city, onCityChange }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
-  },
+  container: {},
   label: {
     fontFamily: 'Poppins-Medium',
     fontSize: 16,

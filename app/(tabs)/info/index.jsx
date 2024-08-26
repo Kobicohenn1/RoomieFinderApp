@@ -3,50 +3,148 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Button,
+  ScrollView,
   Dimensions,
-  SafeAreaView,
+  Image,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
+import { data } from '../../../assets/data/movingHomeContent'; // Ensure correct path
 
 const { width } = Dimensions.get('screen');
 
 const MoveInfo = () => {
-  const [language, setLanguage] = useState('en'); // Default language is English
+  const [language, setLanguage] = useState('en'); // Default to English
 
-  const toggleLanguage = () => {
-    setLanguage((prevLanguage) => (prevLanguage === 'en' ? 'he' : 'en'));
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang);
   };
 
-  return (
-    <SafeAreaView>
-      <View style={styles.container}>
-        <View style={styles.languageSwitcher}>
-          <TouchableOpacity
-            onPress={toggleLanguage}
-            style={styles.languageButton}
+  const openLink = (url) => {
+    Linking.openURL(url);
+  };
+
+  const renderContent = (category) => {
+    return (
+      <View key={category.key} style={styles.categoryContainer}>
+        <Text style={[styles.title, language === 'he' && styles.hebrewTitle]}>
+          {category.title}
+        </Text>
+        {category.image && (
+          <Image source={category.image} style={styles.image} />
+        )}
+        <Text style={[styles.text, language === 'he' && styles.hebrewText]}>
+          {category.content}
+        </Text>
+        {category.services && category.services.length > 0 && (
+          <View
+            style={[
+              styles.servicesContainer,
+              language === 'he' && styles.hebrewServicesContainer,
+            ]}
           >
-            <Text style={styles.languageText}>
-              {language === 'en' ? 'עברית' : 'English'}
+            <Text style={styles.servicesTitle}>
+              {language === 'en' ? 'Services:' : 'שירותים:'}
+            </Text>
+            {category.services.map((service, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.serviceItem,
+                  language === 'he' && styles.hebrewServiceItem,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.serviceName,
+                    language === 'he' && styles.hebrewServiceName,
+                  ]}
+                >
+                  {service.name}
+                </Text>
+                <Text
+                  style={[
+                    styles.serviceDescription,
+                    language === 'he' && styles.hebrewServiceDescription,
+                  ]}
+                >
+                  {service.description}
+                </Text>
+                {service.link && (
+                  <TouchableOpacity
+                    onPress={() => openLink(service.link)}
+                    style={styles.linkButton}
+                  >
+                    <Text style={styles.linkText}>
+                      {language === 'en' ? 'Visit Website' : 'בקר באתר'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+        {category.link && (
+          <TouchableOpacity
+            onPress={() => openLink(category.link)}
+            style={styles.linkButton}
+          >
+            <Text style={styles.linkText}>
+              {language === 'en' ? 'Visit Website' : 'בקר באתר'}
             </Text>
           </TouchableOpacity>
-        </View>
-
-        {language === 'en' ? (
-          <Text style={styles.text}>
-            Moving to a new apartment can be a challenging experience, but with
-            the right guidance, it can become a smooth and easy process. Our
-            service helps you through every step of the move, ensuring that you
-            settle into your new home with ease.
-          </Text>
-        ) : (
-          <Text style={[styles.text, styles.hebrewText]}>
-            מעבר לדירה חדשה יכול להיות חוויה מאתגרת, אך עם ההכוונה הנכונה, זה
-            יכול להפוך לתהליך חלק וקל. השירות שלנו מסייע לכם בכל שלב במעבר,
-            ומבטיח שתתמקמו בנוחות בדירה החדשה שלכם.
-          </Text>
         )}
       </View>
-    </SafeAreaView>
+    );
+  };
+
+  // Find the content for the current language
+  const currentContent = data.find((item) => item.language === language);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.languageSwitcher}>
+        <TouchableOpacity
+          style={[
+            styles.languageButton,
+            language === 'en' && styles.activeLanguageButton,
+          ]}
+          onPress={() => handleLanguageChange('en')}
+        >
+          <Text
+            style={[
+              styles.languageButtonText,
+              language === 'en' && styles.activeLanguageButtonText,
+            ]}
+          >
+            English
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.languageButton,
+            language === 'he' && styles.activeLanguageButton,
+          ]}
+          onPress={() => handleLanguageChange('he')}
+        >
+          <Text
+            style={[
+              styles.languageButtonText,
+              language === 'he' && styles.activeLanguageButtonText,
+            ]}
+          >
+            עברית
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {currentContent.categories.map(renderContent)}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -57,29 +155,118 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: width * 0.9,
     alignSelf: 'center',
+    marginVertical: 20,
   },
   languageSwitcher: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
   languageButton: {
-    padding: 10,
-    backgroundColor: '#007BFF',
-    borderRadius: 5,
+    flex: 1,
+    paddingVertical: 10,
+    marginHorizontal: 5,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#21b78a',
   },
-  languageText: {
+  activeLanguageButton: {
+    backgroundColor: '#21b78a',
+  },
+  languageButtonText: {
+    color: '#21b78a',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  activeLanguageButtonText: {
     color: '#fff',
-    fontFamily: 'Poppins-Medium',
+  },
+  scrollView: {
+    marginTop: 10,
+  },
+  categoryContainer: {
+    marginBottom: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
+  },
+  hebrewTitle: {
+    textAlign: 'right',
   },
   text: {
-    marginTop: 20,
     fontSize: 16,
     lineHeight: 24,
-    color: '#333',
-    fontFamily: 'Poppins-Regular',
+    color: '#666',
   },
   hebrewText: {
-    textAlign: 'right', // Align text to the right for Hebrew
+    textAlign: 'right', // Right-align text for Hebrew
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  servicesContainer: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+  },
+  hebrewServicesContainer: {
+    alignItems: 'flex-end',
+  },
+  servicesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
+  },
+  serviceItem: {
+    marginBottom: 15,
+  },
+  hebrewServiceItem: {
+    alignItems: 'flex-end',
+  },
+  serviceName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#21b78a',
+  },
+  hebrewServiceName: {
+    textAlign: 'right',
+  },
+  serviceDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+  },
+  hebrewServiceDescription: {
+    textAlign: 'right',
+  },
+  linkButton: {
+    marginTop: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10, // Adjusted for a more rounded appearance
+    borderWidth: 2,
+    borderColor: '#21b78a',
+    alignItems: 'center',
+  },
+  linkText: {
+    color: '#21b78a',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

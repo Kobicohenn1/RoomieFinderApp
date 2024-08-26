@@ -34,7 +34,7 @@ const Home = () => {
     // Show the loading overlay for 1.5 seconds
     setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 800);
 
     fetchUserId();
     fetchProfiles();

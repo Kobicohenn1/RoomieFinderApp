@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   selectedOption: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#21b78a',
   },
   selectedOptionText: {
     color: '#fff',

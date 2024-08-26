@@ -22,9 +22,6 @@ const ProfileScreen = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [hasApartment, setHasApartment] = useState(0);
-  const updates = {
-    hasApartmentUpdates: hasApartment === 1,
-  };
   const router = useRouter();
 
   useEffect(() => {
@@ -137,10 +134,11 @@ const ProfileScreen = () => {
         return;
       }
 
-      console.log(updates.hasApartmentUpdates);
+      console.log('Updating hasApartment:', selectedIndex === 1); // Debug log
+
       const response = await axios.put(
         `http://192.168.10.10:3500/api/profile/update-profile`,
-        { userId, updates },
+        { userId, updates: { hasApartment: selectedIndex === 1 } },
         {
           headers: {
             'x-auth-token': token,
@@ -150,21 +148,22 @@ const ProfileScreen = () => {
       );
 
       if (response.status === 200) {
+        console.log('Response:', response.data); // Debug log
         setUserData({ ...userData, hasApartment: selectedIndex === 1 });
         Alert.alert('Success', 'Apartment status updated successfully');
       } else {
         Alert.alert('Error', 'Failed to update apartment status');
       }
     } catch (error) {
-      console.error('error updating apartment status');
-      Alert.alert('Alert error updating apartment status');
+      console.error('Error updating apartment status:', error.message);
+      Alert.alert('Error updating apartment status:', error.message);
     }
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#21b78a" />
       </View>
     );
   }
@@ -191,9 +190,7 @@ const ProfileScreen = () => {
                 'Settings functionality will be implemented.'
               )
             }
-          >
-            <Text style={styles.settingsIcon}>⚙️</Text>
-          </TouchableOpacity>
+          ></TouchableOpacity>
         </View>
         <TouchableOpacity onPress={pickImage}>
           <Image
@@ -209,16 +206,14 @@ const ProfileScreen = () => {
           />
           {uploading && (
             <View style={styles.uploadingContainer}>
-              <ActivityIndicator size="large" color="#0000ff" />
+              <ActivityIndicator size="large" color="#21b78a" />
             </View>
           )}
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.cameraIconContainer}
           onPress={pickImage}
-        >
-          <Text style={styles.cameraIcon}>📷</Text>
-        </TouchableOpacity>
+        ></TouchableOpacity>
         <View style={styles.profileInfoContainer}>
           <Text style={styles.profileName}>
             {userData.name || userData.username}, {userData.age || 'N/A'}
@@ -243,8 +238,10 @@ const ProfileScreen = () => {
               setHasApartment(selectedIndex);
               handleHasApartment(selectedIndex);
             }}
+            tintColor="#21b78a"
+            style={styles.segmentedControl}
           />
-          {!hasApartment ? null : <ApartmentForm />}
+          {hasApartment === 1 && <ApartmentForm />}
         </View>
         <View style={{ height: 30 }} />
       </ScrollView>
@@ -281,8 +278,9 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerText: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
   },
   settingsIcon: {
     fontSize: 25,
@@ -299,12 +297,13 @@ const styles = StyleSheet.create({
     top: 65,
     right: '40%',
     transform: [{ translateX: -20 }],
-    backgroundColor: '#fff',
+    backgroundColor: '#e6e8e4',
     borderRadius: 15,
-    padding: 3,
+    padding: 5,
   },
   cameraIcon: {
     fontSize: 30,
+    color: '#21b78a',
   },
   profileInfoContainer: {
     alignItems: 'center',
@@ -313,6 +312,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
   },
   profileMemberSince: {
     fontSize: 16,
@@ -321,46 +321,19 @@ const styles = StyleSheet.create({
   },
   editProfileButton: {
     marginTop: 20,
-    backgroundColor: '#32CD32',
-    borderRadius: 5,
+    backgroundColor: '#21b78a',
+    borderRadius: 20,
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
   },
   editProfileButtonText: {
     fontSize: 16,
     color: '#fff',
-  },
-  verifyContainer: {
-    marginTop: 30,
-    paddingHorizontal: 20,
-  },
-  verifyText: {
-    fontSize: 18,
     fontWeight: 'bold',
-    color: '#32CD32',
-  },
-  verifySubText: {
-    fontSize: 14,
-    color: '#888',
-    marginTop: 5,
-    textAlign: 'center',
-  },
-  verifyIconsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
-  },
-  verifyIcon: {
-    fontSize: 30,
-  },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
   },
   segmentedContainer: {
-    width: '60%',
+    width: '80%',
     marginTop: 20,
     justifyContent: 'space-between',
     alignSelf: 'center',
@@ -370,6 +343,15 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 10,
     textAlign: 'center',
+  },
+  segmentedControl: {
+    marginTop: 10,
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

@@ -88,7 +88,7 @@ const FilterModal = ({ isVisible, onClose, onFiltersApplied }) => {
         onFiltersApplied();
         onClose();
       } else {
-        Alert.alert('Error', 'Faild to save filters');
+        Alert.alert('Error', 'Failed to save filters');
       }
     } catch (error) {
       console.error('Error update filter', error.message);
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'white',
     marginLeft: 10,
   },
   applyText: {

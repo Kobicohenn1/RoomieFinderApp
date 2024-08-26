@@ -105,7 +105,7 @@ const FilterScreen = ({ onFiltersApplied }) => {
 
       if (response.status === 200) {
         Alert.alert('Success', 'Filters saved successfully');
-        handleFiltersApplied?.(); // Call the function passed via props
+        //handleFiltersApplied?.(); // Call the function passed via props
 
         router.back();
         router.back();
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#21b78a',
     borderRadius: 25,
     paddingVertical: 15,
     paddingHorizontal: 40,

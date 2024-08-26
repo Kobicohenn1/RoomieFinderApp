@@ -19,6 +19,7 @@ import have_home from '../assets/icons/have-home.png';
 import smoking_allowed from '../assets/icons/smoking_allowed.png';
 import pet_not_allowed from '../assets/icons/pet_not_allowed.png';
 import filter_icon from '../assets/icons/filter_icon.svg';
+import move_home from '../assets/icons/move-home.png';
 
 export default {
   play,
@@ -42,4 +43,5 @@ export default {
   smoking_allowed,
   pet_not_allowed,
   filter_icon,
+  move_home,
 };

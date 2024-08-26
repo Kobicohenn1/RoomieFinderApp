@@ -14,6 +14,8 @@ exports.updateProfile = async (req, res) => {
     }
 
     // Specific updates for each field
+    if (updates.hasApartment !== undefined)
+      user.hasApartment = updates.hasApartment;
     if (updates.gender !== undefined) user.gender = updates.gender;
     if (updates.occupation !== undefined) user.occupation = updates.occupation;
     if (updates.personality !== undefined)

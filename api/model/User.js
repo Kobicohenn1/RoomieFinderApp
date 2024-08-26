@@ -29,7 +29,7 @@ const UserSchema = new Schema(
     },
     profileImageUrl: {
       type: String,
-      default: '/uploads/placeholder-profile.jpeg',
+      default: '/uploads/profiles/placeholder-profile.jpeg',
     },
     memberSince: {
       type: Date,

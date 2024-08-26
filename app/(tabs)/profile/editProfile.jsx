@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { CITIES } from '../../../constants/cities';
+import { emojis } from '../../../constants/emojis';
 
 const options = {
   gender: ['Female', 'Male', 'Non-binary'],
@@ -21,7 +22,6 @@ const options = {
   personality: ['Introvert', 'Extrovert', 'Ambivert'],
   lifestyle: ['Active', 'Relaxed', 'Balanced'],
   smokingHabit: ['Yes', 'No', 'Outside Only'],
-  pets: ['Dog', 'Cat', 'Others', 'No Pets'],
   music: [
     'Pop',
     'Rock',
@@ -33,6 +33,7 @@ const options = {
   ],
   sports: ['Soccer', 'Basketball', 'Tennis', 'Running', 'Swimming', 'Yoga'],
   movieGenres: ['Action', 'Comedy', 'Drama', 'Sci-Fi', 'Thriller', 'Romance'],
+  pets: ['Dog', 'Cat', 'Others', 'No Pets'],
 };
 
 const ages = Array.from({ length: 83 }, (_, i) => i + 18);
@@ -55,44 +56,51 @@ const EditProfileScreen = () => {
   const [introduceYourself, setIntroduceYourself] = useState('');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ success: '', error: '' });
-  const [hasApartment, setHasApartment] = useState(0);
+  const [petOptions, setPetOptions] = useState([
+    'Dog',
+    'Cat',
+    'Others',
+    'No Pets',
+  ]); // Default options
   const scrollViewRef = useRef();
   const router = useRouter();
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndPetOptions = async () => {
       try {
         const userId = await AsyncStorage.getItem('userId');
         const token = await AsyncStorage.getItem('token');
         if (!userId || !token) throw new Error('Authentication error');
-        const response = await axios.get(
+
+        // Fetch user profile
+        const profileResponse = await axios.get(
           `http://192.168.10.10:3500/api/users/${userId}`,
           {
             headers: { 'x-auth-token': token },
           }
         );
-        const data = response.data;
+        const profileData = profileResponse.data;
         setProfile({
-          gender: data.gender || '',
-          occupation: data.occupation || '',
-          personality: data.personality || '',
-          lifestyle: data.lifestyle || '',
-          smokingHabit: data.smokingHabit || '', // New field
-          pets: data.pets || '', // New field
-          music: data.music || [],
-          sports: data.sports || [],
-          movieGenres: data.movieGenres || [],
-          city: data.city || '',
-          age: data.age || '',
+          gender: profileData.gender || '',
+          occupation: profileData.occupation || '',
+          personality: profileData.personality || '',
+          lifestyle: profileData.lifestyle || '',
+          smokingHabit: profileData.smokingHabit || '',
+          pets: profileData.pets || '',
+          music: profileData.music || [],
+          sports: profileData.sports || [],
+          movieGenres: profileData.movieGenres || [],
+          city: profileData.city || '',
+          age: profileData.age || '',
         });
-        setIntroduceYourself(data.introduceYourself || '');
+        setIntroduceYourself(profileData.introduceYourself || '');
       } catch (error) {
         setMessage({ success: '', error: error.message });
       } finally {
         setLoading(false);
       }
     };
-    fetchProfile();
+    fetchProfileAndPetOptions();
   }, []);
 
   const handleSubmit = async () => {
@@ -101,8 +109,8 @@ const EditProfileScreen = () => {
       occupation: profile.occupation,
       personality: profile.personality,
       lifestyle: profile.lifestyle,
-      smokingHabit: profile.smokingHabit, // New field
-      pets: profile.pets, // New field
+      smokingHabit: profile.smokingHabit,
+      pets: profile.pets,
       introduceYourself: introduceYourself,
       music: profile.music,
       sports: profile.sports,
@@ -154,27 +162,33 @@ const EditProfileScreen = () => {
 
   const renderOption = (category, option) => {
     const isMultiSelect = Array.isArray(profile[category]);
-    return isMultiSelect ? (
+    const emoji = emojis[category] ? emojis[category][option] : null;
+    const isSelected = isMultiSelect
+      ? profile[category].includes(option)
+      : profile[category] === option;
+
+    return (
       <TouchableOpacity
         key={option}
         style={[
           styles.option,
-          profile[category].includes(option) && styles.optionSelected,
+          isSelected && styles.optionSelected,
+          !isSelected && styles.optionUnselected,
         ]}
-        onPress={() => toggleOption(category, option)}
+        onPress={() =>
+          isMultiSelect
+            ? toggleOption(category, option)
+            : handleChange(category, option)
+        }
       >
-        <Text style={styles.optionText}>{option}</Text>
-      </TouchableOpacity>
-    ) : (
-      <TouchableOpacity
-        key={option}
-        style={[
-          styles.radioOption,
-          profile[category] === option && styles.optionSelected,
-        ]}
-        onPress={() => handleChange(category, option)}
-      >
-        <Text style={styles.optionText}>{option}</Text>
+        <Text
+          style={[
+            styles.optionText,
+            !isSelected && styles.optionTextUnselected,
+          ]}
+        >
+          {emoji} {option}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -185,7 +199,6 @@ const EditProfileScreen = () => {
         contentContainerStyle={styles.container}
         automaticallyAdjustKeyboardInsets={true}
         ref={scrollViewRef}
-        //showsVerticalScrollIndicator={false}
       >
         {message.success && (
           <Text style={styles.successMessage}>{message.success}</Text>
@@ -302,45 +315,63 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#333',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   radioContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
     flexWrap: 'wrap',
   },
   radioOption: {
-    backgroundColor: '#E0E0E0',
-    padding: 10,
-    margin: 5,
-    borderRadius: 5,
+    backgroundColor: '#F0F0F0',
+    paddingVertical: 10, // Dynamic padding for vertical space
+    paddingRight: 3, // Dynamic padding for horizontal space
+    margin: 8,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ccc',
+    flexDirection: 'row', // Row direction for icon + text
+    alignItems: 'center', // Vertically center items
+    justifyContent: 'center', // Center items horizontally
   },
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   option: {
-    backgroundColor: '#E0E0E0',
-    padding: 10,
-    margin: 5,
-    borderRadius: 5,
+    backgroundColor: '#F0F0F0',
+    paddingVertical: 10, // Dynamic padding for vertical space
+    paddingRight: 5, // Dynamic padding for horizontal space
+    margin: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#ccc',
+    flexDirection: 'row', // Row direction for icon + text
+    alignItems: 'center', // Vertically center items
+    justifyContent: 'center', // Center items horizontally
   },
   optionSelected: {
     backgroundColor: '#fff',
+    borderColor: '#21b78a',
+    borderWidth: 2,
+  },
+  optionUnselected: {
+    backgroundColor: '#D3D3D3', // Darker background for unselected options
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 15,
+    fontFamily: 'Poppins-Medium',
     color: '#333',
+    marginLeft: 8,
+  },
+  optionTextUnselected: {
+    color: '#777', // Darker text color for unselected options
   },
   updateButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#21b78a',
     borderRadius: 25,
     paddingVertical: 15,
     marginTop: 20,

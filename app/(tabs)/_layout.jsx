@@ -4,13 +4,18 @@ import { Tabs } from 'expo-router';
 import { icons } from '../../constants';
 
 const TabIcon = ({ icon, color, name, focused }) => {
+  const isInfoTab = name === 'Info';
+
   return (
     <View style={styles.tabIconContainer}>
       <Image
         source={icon}
         resizeMode="contain"
         tintColor="gray"
-        style={{ width: 25, height: 25 }}
+        style={{
+          width: isInfoTab ? 27 : 25, // Adjust size for Info tab
+          height: isInfoTab ? 27 : 25, // Adjust size for Info tab
+        }}
       />
       <Text
         style={{
@@ -43,7 +48,7 @@ const TabsLayout = () => {
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
-              icon={icons.info}
+              icon={icons.move_home}
               name="Info"
               focused={focused}
               color={color}

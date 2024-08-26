@@ -3,10 +3,10 @@ import {
   View,
   Text,
   ScrollView,
-  Button,
   StyleSheet,
   Alert,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
 import Input from './Input';
 import Counter from '../Counter';
@@ -21,7 +21,7 @@ import CitySelector from '../CitySelector'; // Import the CitySelector component
 
 const ApartmentForm = () => {
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState(''); // Removed filteredCities state
+  const [city, setCity] = useState('');
   const [numberOfRooms, setNumberOfRooms] = useState(0);
   const [numberOfPeople, setNumberOfPeople] = useState({ female: 0, male: 0 });
   const [rentPrice, setRentPrice] = useState('');
@@ -124,8 +124,8 @@ const ApartmentForm = () => {
   };
 
   const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false); // Close the date picker after a date is selected
     const currentDate = selectedDate || moveInDate;
-    setShowDatePicker(Platform.OS === 'ios');
     setMoveInDate(currentDate);
   };
 
@@ -187,10 +187,20 @@ const ApartmentForm = () => {
       );
 
       console.log('Uploaded image paths:', res.data.filePaths);
-      setApartmentData({
-        ...apartmentData,
-        images: [...(apartmentData.images || []), ...res.data.filePaths],
-      });
+
+      // Check if apartmentData is null before updating it
+      if (apartmentData) {
+        setApartmentData({
+          ...apartmentData,
+          images: [...(apartmentData.images || []), ...res.data.filePaths],
+        });
+      } else {
+        // Handle the case where apartmentData is null
+        setApartmentData({
+          images: res.data.filePaths,
+        });
+      }
+
       setImages([]);
     } catch (error) {
       console.error('Error uploading images:', error.message);
@@ -237,14 +247,16 @@ const ApartmentForm = () => {
   };
 
   return (
-    <ScrollView>
-      <View>
-        <Text style={styles.title}>Apartment Details</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Apartment Details</Text>
 
+      <View style={styles.sectionContainer}>
         <CitySelector label="City *" city={city} onCityChange={setCity} />
+      </View>
 
+      <View style={styles.sectionContainer}>
         <Input
-          label="Address *"
+          label="* Address "
           textInputConfig={{
             value: address,
             onChangeText: setAddress,
@@ -252,15 +264,21 @@ const ApartmentForm = () => {
             autoCapitalize: 'words',
           }}
         />
+      </View>
+
+      <View style={styles.sectionContainer}>
         <Counter
-          label="How many Rooms? *"
+          label="* How many Rooms?"
           value={numberOfRooms}
           onIncrement={() => setNumberOfRooms((currRooms) => currRooms + 1)}
           onDecrement={() =>
             setNumberOfRooms((currRooms) => Math.max(0, currRooms - 1))
           }
         />
-        <Text>Who lives in the property? *</Text>
+      </View>
+
+      <View style={styles.sectionContainer}>
+        <Text style={styles.label}>* Who lives in the property?</Text>
         <Counter
           label="Male"
           value={numberOfPeople.male}
@@ -279,7 +297,7 @@ const ApartmentForm = () => {
         />
         <Counter
           label="Female"
-          noBorder={1}
+          noBorder={0}
           value={numberOfPeople.female}
           onDecrement={() =>
             setNumberOfPeople((prev) => ({
@@ -294,6 +312,9 @@ const ApartmentForm = () => {
             }))
           }
         />
+      </View>
+
+      <View style={styles.sectionContainer}>
         <Input
           label="Rent Price *"
           textInputConfig={{
@@ -303,20 +324,23 @@ const ApartmentForm = () => {
             onChangeText: (text) => setRentPrice(Number(text)),
           }}
         />
+      </View>
+
+      <View style={styles.sectionContainer}>
         <Text style={styles.label}>Move-In Date *</Text>
-        <Button title="Select Date" onPress={() => setShowDatePicker(true)} />
-        {(showDatePicker || moveInDate) && (
+
+        <View style={styles.datePickerContainer}>
           <DateTimePicker
             value={moveInDate}
             mode="date"
             display="calendar"
             onChange={handleDateChange}
-            style={{
-              display: 'flex',
-              alignSelf: 'center',
-            }}
+            style={styles.datePicker}
           />
-        )}
+        </View>
+      </View>
+
+      <View style={styles.sectionContainer}>
         <Text style={styles.label}>House Rules</Text>
         <View style={styles.iconRow}>
           <SelectableIcon
@@ -350,6 +374,9 @@ const ApartmentForm = () => {
             }}
           />
         </View>
+      </View>
+
+      <View style={styles.sectionContainer}>
         <Input
           label="Description"
           textInputConfig={{
@@ -360,36 +387,87 @@ const ApartmentForm = () => {
             numberOfLines: 4,
           }}
         />
-        <Button title="Pick Images" onPress={handleImagePicker} />
-        <View style={styles.imageRow}>
-          {apartmentData &&
-            apartmentData.images &&
-            apartmentData.images.map((image, index) => (
-              <ImageComponent
-                uri={`http://192.168.10.10:3500/${image}`}
-                key={index}
-                onRemove={() => handleRemoveImage(index, image)}
-              />
-            ))}
-          {images.map((image, index) => (
+      </View>
+
+      <TouchableOpacity style={styles.imageButton} onPress={handleImagePicker}>
+        <Text style={styles.imageButtonText}>Pick Images</Text>
+      </TouchableOpacity>
+
+      <View style={styles.imageRow}>
+        {apartmentData &&
+          apartmentData.images &&
+          apartmentData.images.map((image, index) => (
             <ImageComponent
-              uri={image.uri}
-              key={apartmentData ? apartmentData.images.length + index : index}
-              onRemove={() => handleRemoveImage(index, image.uri)}
+              uri={`http://192.168.10.10:3500/${image}`}
+              key={index}
+              onRemove={() => handleRemoveImage(index, image)}
             />
           ))}
-        </View>
-        <Button title="Submit" onPress={handleSubmit} />
+        {images.map((image, index) => (
+          <ImageComponent
+            uri={image.uri}
+            key={apartmentData ? apartmentData.images.length + index : index}
+            onRemove={() => handleRemoveImage(index, image.uri)}
+          />
+        ))}
       </View>
+
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Submit</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    paddingBottom: 60,
+    backgroundColor: '#e6e8e4',
+  },
   label: {
     fontSize: 16,
     marginTop: 8,
     marginBottom: 8,
+    color: '#333',
+    fontWeight: '500',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    textAlign: 'center',
+    color: '#222',
+  },
+  sectionContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  datePickerContainer: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginTop: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dateButtonText: {
+    color: '#333',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  datePicker: {
+    width: '100%',
+    alignSelf: 'center',
   },
   iconRow: {
     flexDirection: 'row',
@@ -397,16 +475,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 20,
   },
+  imageButton: {
+    backgroundColor: '#21b78a',
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  imageButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
   imageRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+  submitButton: {
+    backgroundColor: '#21b78a',
+    padding: 15,
+    borderRadius: 30,
+    marginTop: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  submitButtonText: {
+    color: '#fff',
     textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

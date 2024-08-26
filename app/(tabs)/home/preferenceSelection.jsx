@@ -8,9 +8,9 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
-import { API_BASE_URL } from '../../../constants';
-const { width } = Dimensions.get('screen');
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const { width } = Dimensions.get('screen');
 
 const PreferenceSelection = () => {
   const router = useRouter();
@@ -136,12 +136,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   questionText: {
     textAlign: 'center',
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
     marginBottom: 20,
   },
   toggleContainer: {
@@ -151,17 +152,22 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     flex: 1,
-    paddingVertical: 12,
-    backgroundColor: '#f0f0f0',
+    paddingVertical: 15,
+    backgroundColor: '#fff',
     marginHorizontal: 5,
-    borderRadius: 25,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#21b78a',
   },
   selectedToggle: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#21b78a',
   },
   toggleText: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
   optionsContainer: {
     flexDirection: 'row',
@@ -170,23 +176,28 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   optionButton: {
-    width: (width - 80) / 2,
-    paddingVertical: 12,
-    backgroundColor: '#f0f0f0',
+    width: (width - 60) / 2,
+    paddingVertical: 15,
+    backgroundColor: '#fff',
     margin: 5,
-    borderRadius: 25,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#21b78a',
   },
   selectedOption: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#21b78a',
   },
   optionText: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
   nextButton: {
-    backgroundColor: '#888',
+    backgroundColor: '#21b78a',
     paddingVertical: 15,
-    borderRadius: 25,
+    borderRadius: 10,
     alignItems: 'center',
     marginHorizontal: 50,
   },

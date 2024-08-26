@@ -9,7 +9,6 @@ import {
   ScrollView,
   Image,
   Alert,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
 import { Ionicons, FontAwesome, MaterialIcons } from '@expo/vector-icons';
@@ -17,6 +16,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { icons } from '../constants';
 import TagList from './TagList';
+import { emojis } from '../constants/emojis';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -81,12 +81,16 @@ const ProfileModal = ({ onClose, isModalVisible, profile }) => {
               style={styles.profileImage}
             />
             <View style={styles.profileInfoContainer}>
-              <Text style={styles.profileName}>{profile.username},</Text>
-              <Text style={styles.profileAge}>{profile.age}</Text>
+              <Text style={styles.profileName}>
+                {profile.username}
+                <Text style={styles.profileAge}> {profile.age}</Text>
+                <Text style={styles.commaText}>,</Text>
+              </Text>
               <FontAwesome
                 name={`${profile.gender?.toLowerCase()}`}
                 size={24}
                 color="black"
+                style={styles.genderIcon}
               />
             </View>
             <InfoRow
@@ -307,10 +311,10 @@ const InfoRow = ({ IconComponent, iconProps, text }) => (
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: 'white', // Set the background color to white
+    backgroundColor: 'white',
   },
   modalContent: {
-    flex: 1, // Make sure the content takes up the full screen
+    flex: 1,
     padding: 20,
   },
   scrollContainer: {
@@ -320,12 +324,51 @@ const styles = StyleSheet.create({
     width: width * 0.8,
     height: height * 0.3,
     borderRadius: 17,
-    alignSelf: 'center', // Center the image horizontally
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  profileInfoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  profileName: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  profileAge: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 24,
+    marginLeft: 5,
+  },
+  commaText: {
+    fontSize: 24,
+    fontFamily: 'Poppins-SemiBold',
+  },
+  genderIcon: {
+    marginLeft: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  infoText: {
+    fontFamily: 'Poppins-Medium',
+    marginHorizontal: 5,
+  },
+  fullWidthSeparator: {
+    width: '100%',
+    height: 1,
+    backgroundColor: 'gray',
+    marginVertical: 10,
   },
   apartmentImage: {
     width: width * 0.8,
     height: height * 0.3,
-    marginVertical: 10, // Add some spacing between images
+    marginVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
   },
@@ -344,41 +387,6 @@ const styles = StyleSheet.create({
     top: 40,
     right: 20,
   },
-  closeText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  profileName: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 24,
-    textAlign: 'center', // Center the text horizontally
-  },
-  profileInfoContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-    flexDirection: 'row',
-    justifyContent: 'center', // Center the content horizontally
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  infoText: {
-    fontFamily: 'Poppins-Medium',
-    marginHorizontal: 5,
-  },
-  profileAge: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 18,
-  },
-  fullWidthSeparator: {
-    width: '100%',
-    height: 1,
-    backgroundColor: 'gray',
-    marginVertical: 10,
-  },
   apartmentHeading: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -390,15 +398,27 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   descriptionContainer: {
+    backgroundColor: '#f7f7f7',
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
     marginVertical: 10,
   },
   descriptionText: {
-    fontFamily: 'Poppins-Medium',
-    color: '#555',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#333',
+    fontSize: 16,
+    lineHeight: 24,
   },
   closeButton: {
     marginTop: 20,
-    alignSelf: 'center', // Center the close button horizontally
+    alignSelf: 'center',
   },
   closeButtonText: {
     color: '#ff6b6b',
