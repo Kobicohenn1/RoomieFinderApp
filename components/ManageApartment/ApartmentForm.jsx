@@ -17,7 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ImageComponent from './ImageComponent';
-import CitySelector from '../CitySelector'; // Import the CitySelector component
+import CitySelector from '../CitySelector';
 
 const ApartmentForm = () => {
   const [address, setAddress] = useState('');
@@ -36,10 +36,12 @@ const ApartmentForm = () => {
   const [images, setImages] = useState([]);
   const [userData, setUserData] = useState(null);
   const [apartmentData, setApartmentData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        setIsLoading(true);
         const token = await AsyncStorage.getItem('token');
         const userId = await AsyncStorage.getItem('userId');
         if (!token || !userId) {
@@ -90,6 +92,8 @@ const ApartmentForm = () => {
       } catch (error) {
         console.error('Error fetching user data:', error.message);
         Alert.alert('Error', 'Failed to fetch user data');
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchUserData();
@@ -124,9 +128,14 @@ const ApartmentForm = () => {
   };
 
   const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(false); // Close the date picker after a date is selected
-    const currentDate = selectedDate || moveInDate;
-    setMoveInDate(currentDate);
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setMoveInDate(selectedDate);
+    }
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
   };
 
   const handleImagePicker = async () => {
@@ -188,14 +197,12 @@ const ApartmentForm = () => {
 
       console.log('Uploaded image paths:', res.data.filePaths);
 
-      // Check if apartmentData is null before updating it
       if (apartmentData) {
         setApartmentData({
           ...apartmentData,
           images: [...(apartmentData.images || []), ...res.data.filePaths],
         });
       } else {
-        // Handle the case where apartmentData is null
         setApartmentData({
           images: res.data.filePaths,
         });
@@ -245,6 +252,14 @@ const ApartmentForm = () => {
       console.error('Error submitting form:', error.message);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading apartment details...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -328,16 +343,22 @@ const ApartmentForm = () => {
 
       <View style={styles.sectionContainer}>
         <Text style={styles.label}>Move-In Date *</Text>
-
-        <View style={styles.datePickerContainer}>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={showDatePickerModal}
+        >
+          <Text style={styles.dateButtonText}>
+            {moveInDate.toLocaleDateString()}
+          </Text>
+        </TouchableOpacity>
+        {showDatePicker && (
           <DateTimePicker
             value={moveInDate}
             mode="date"
-            display="calendar"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={handleDateChange}
-            style={styles.datePicker}
           />
-        </View>
+        )}
       </View>
 
       <View style={styles.sectionContainer}>
@@ -345,31 +366,31 @@ const ApartmentForm = () => {
         <View style={styles.iconRow}>
           <SelectableIcon
             source={icons.shabbat}
-            selected={houseRules.shabbatObservance}
+            selected={houseRules.shabbat}
             onPress={() => {
               setHouseRules({
                 ...houseRules,
-                shabbatObservance: !houseRules.shabbatObservance,
+                shabbat: !houseRules.shabbat,
               });
             }}
           />
           <SelectableIcon
             source={icons.smoker}
-            selected={houseRules.smokerFriendly}
+            selected={houseRules.smoking}
             onPress={() =>
               setHouseRules({
                 ...houseRules,
-                smokerFriendly: !houseRules.smokerFriendly,
+                smoking: !houseRules.smoking,
               })
             }
           />
           <SelectableIcon
             source={icons.pet_friendly}
-            selected={houseRules.petFriendly}
+            selected={houseRules.pets}
             onPress={() => {
               setHouseRules({
                 ...houseRules,
-                petFriendly: !houseRules.petFriendly,
+                pets: !houseRules.pets,
               });
             }}
           />
@@ -425,6 +446,16 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
     backgroundColor: '#e6e8e4',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e6e8e4',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#333',
+  },
   label: {
     fontSize: 16,
     marginTop: 8,
@@ -450,7 +481,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  datePickerContainer: {
+  dateButton: {
     backgroundColor: '#fff',
     padding: 10,
     borderRadius: 10,
@@ -458,16 +489,11 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     marginTop: 8,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   dateButtonText: {
     color: '#333',
     textAlign: 'center',
     fontWeight: '500',
-  },
-  datePicker: {
-    width: '100%',
-    alignSelf: 'center',
   },
   iconRow: {
     flexDirection: 'row',

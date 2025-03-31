@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import 'react-native-get-random-values';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,

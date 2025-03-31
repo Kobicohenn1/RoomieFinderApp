@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AddEventModal from './AddEventModal';
 
 const { height } = Dimensions.get('screen');
 
@@ -23,33 +24,46 @@ const OptionsModal = ({
   onClose,
   onOpenFilterModal,
   onOpenBugReportModal,
-}) => (
-  <Modal
-    visible={isVisible}
-    transparent
-    animationType="slide"
-    onRequestClose={onClose}
-  >
-    <TouchableOpacity
-      style={styles.modalOverlay}
-      activeOpacity={1}
-      onPress={onClose}
+}) => {
+  const [isAddEventModalVisible, setAddEventModalVisible] = useState(false);
+
+  return (
+    <Modal
+      visible={isVisible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
     >
-      <View style={styles.optionsModalContainer}>
-        <OptionItem
-          iconName="options-outline"
-          text="Filter"
-          onPress={onOpenFilterModal}
-        />
-        <OptionItem
-          iconName="help-circle-outline"
-          text="Bugs Report"
-          onPress={onOpenBugReportModal}
-        />
-      </View>
-    </TouchableOpacity>
-  </Modal>
-);
+      <TouchableOpacity
+        style={styles.modalOverlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <View style={styles.optionsModalContainer}>
+          <OptionItem
+            iconName="options-outline"
+            text="Filter"
+            onPress={onOpenFilterModal}
+          />
+          <OptionItem
+            iconName="calendar-number-outline"
+            text="Create Calendar Event"
+            onPress={() => setAddEventModalVisible(true)}
+          />
+          <OptionItem
+            iconName="help-circle-outline"
+            text="Bugs Report"
+            onPress={onOpenBugReportModal}
+          />
+        </View>
+      </TouchableOpacity>
+      <AddEventModal
+        isVisible={isAddEventModalVisible}
+        onClose={() => setAddEventModalVisible(false)}
+      />
+    </Modal>
+  );
+};
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -61,12 +75,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    // Add shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.2,
     shadowRadius: 10,
-    // Add elevation for Android
     elevation: 8,
   },
   optionItem: {

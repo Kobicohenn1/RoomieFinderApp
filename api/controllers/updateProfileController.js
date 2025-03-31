@@ -1,13 +1,12 @@
-const User = require('../model/User'); // Ensure the correct path to your User model
+const User = require('../model/User');
 
-// Update user profile
 // Update user profile
 exports.updateProfile = async (req, res) => {
-  const { userId, updates } = req.body;
+  const { updates } = req.body;
 
   try {
-    // Find user by ID
-    let user = await User.findById(userId);
+    // Find user by ID from auth token
+    let user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
@@ -30,9 +29,8 @@ exports.updateProfile = async (req, res) => {
     if (updates.city !== undefined) user.city = updates.city;
     if (updates.age !== undefined) user.age = updates.age;
     if (updates.smokingHabit !== undefined)
-      user.smokingHabit = updates.smokingHabit; // New field
-    if (updates.pets !== undefined) user.pets = updates.pets; // New field
-
+      user.smokingHabit = updates.smokingHabit;
+    if (updates.pets !== undefined) user.pets = updates.pets;
     if (updates.lookingFor !== undefined) user.lookingFor = updates.lookingFor;
 
     // Save the updated user profile

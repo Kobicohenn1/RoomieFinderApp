@@ -11,7 +11,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
       <Image
         source={icon}
         resizeMode="contain"
-        tintColor="gray"
+        tintColor={focused ? '#21b78a' : 'gray'}
         style={{
           width: isInfoTab ? 27 : 25, // Adjust size for Info tab
           height: isInfoTab ? 27 : 25, // Adjust size for Info tab
@@ -78,6 +78,20 @@ const TabsLayout = () => {
             <TabIcon
               icon={icons.profile}
               name="Profile"
+              focused={focused}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          headerShown: true,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.chat_icon}
+              name="Chat"
               focused={focused}
               color={color}
             />

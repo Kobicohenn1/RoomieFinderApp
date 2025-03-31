@@ -99,6 +99,18 @@ const UserSchema = new Schema(
       type: Schema.ObjectId,
       ref: 'Filters',
     },
+    likedUsers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    matches: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   { timestamps: true }
 );
