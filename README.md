@@ -10,6 +10,12 @@ A mobile app I built to help people find roommates and manage apartment listings
 - **Search & Filter**: Find apartments based on location, price, and preferences
 - **Real-time Updates**: Track apartment status and roommate matches
 
+## Demo
+
+[![RoomieFinder Demo](https://img.youtube.com/vi/-spYLN6l9Mk/0.jpg)](https://www.youtube.com/watch?v=-spYLN6l9Mk)
+
+This video demonstrates the key features of RoomieFinder, including user registration, profile management, and apartment listings.
+
 ## Tech Stack
 
 ### Frontend
