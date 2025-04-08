@@ -12,6 +12,49 @@ const initialState = {
   userId: null,
 };
 
+//Async thunk for sign up
+
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async ({ username, email, password }, { rejectWithValue }) => {
+    let registerResponse;
+    try {
+      registerResponse = await axios.post(`${API_BASE_URL}/register`, {
+        username,
+        email,
+        password,
+      });
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data.message || 'Registration failed'
+      );
+    }
+    try {
+      const loginResponse = await axios.post(`${API_BASE_URL}/login`, {
+        email,
+        password,
+      });
+      const { token, userId } = loginResponse.data;
+
+      if (!token || !userId) {
+        return rejectWithValue('Token or user id missing in the response');
+      }
+
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('userId', userId);
+
+      return {
+        registerData: registerResponse.data,
+        token,
+        userId,
+        isLoggedIn: true,
+      };
+    } catch (error) {
+      return rejectWithValue('Login after registration failed');
+    }
+  }
+);
+
 //Async thunk for login
 export const loginUser = createAsyncThunk(
   'auth/login',
@@ -30,8 +73,10 @@ export const loginUser = createAsyncThunk(
       await AsyncStorage.setItem('userId', userId);
 
       return { token, userId };
-    } catch (err) {
-      rejectWithValue(err.response?.data?.message || 'Faild to log in');
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Faild to log in'
+      );
     }
   }
 );
@@ -62,6 +107,23 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.error = action.payload;
         state.isLoading = false;
+      })
+      .addCase(registerUser.pending, (state, action) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+        if (action.payload.isLoggedIn) {
+          state.isLoggedIn = true;
+          state.token = action.payload.token;
+          state.userId = action.payload.userId;
+        }
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });

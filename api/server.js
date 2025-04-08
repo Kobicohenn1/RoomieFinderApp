@@ -20,6 +20,10 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(
+  '/uploads/profiles',
+  express.static(path.join(__dirname, 'uploads/profiles'))
+);
 
 // Route Files - Order matters for route matching
 app.use('/api/users', require('./routes/user')); // This should handle /profile

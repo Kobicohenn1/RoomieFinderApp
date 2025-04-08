@@ -16,9 +16,14 @@ const uploadProfilePicture = async (req, res) => {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    // Update user's profile image URL
-    user.profileImageUrl = `/uploads/${req.file.filename}`;
+    // Update user's profile image URL with the correct path
+    // Make sure the URL matches the actual file path
+    const profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+    user.profileImageUrl = profileImageUrl;
     await user.save();
+
+    // Log the URL for debugging
+    console.log('Profile image URL:', profileImageUrl);
 
     res.json({
       msg: 'Profile picture updated',

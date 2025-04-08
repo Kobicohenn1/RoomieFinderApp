@@ -10,11 +10,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import axios from 'axios';
 import { images } from '../../constants';
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
 import { useRouter } from 'expo-router';
+import { registerUser } from '../store/slices/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const SignUp = () => {
   const [form, setForm] = useState({
@@ -23,8 +24,9 @@ const SignUp = () => {
     password: '',
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { isLoading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const submit = async () => {
     if (!form.username || !form.email || !form.password) {
@@ -32,23 +34,26 @@ const SignUp = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const response = await axios.post(
-        'http://192.168.10.10:3500/api/register',
-        form
-      );
-      Alert.alert('Success', response.data.msg);
-      // Redirect to sign-in screen
-      setTimeout(() => {
+      const result = await dispatch(registerUser(form)).unwrap();
+      if (result.isLoggedIn) {
+        Alert.alert('Registration successful! You are now logged in.');
+        setTimeout(() => {
+          router.replace('/(tabs)/home');
+        }, 1000);
+      } else {
+        // Registration successful but login failed
+        Alert.alert(
+          'Success',
+          'Registration successful! Please log in to continue.'
+        );
         router.push('/sign-in');
-      }, 1000);
+      }
+
+      // Redirect to home screen if the registartion and the log in was success
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Failed to register');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -87,9 +92,9 @@ const SignUp = () => {
               secureTextEntry
             />
             <CustomButton
-              title="Sign Up"
+              title={isLoading ? 'Signing Up...' : 'Sign Up'}
               handlePress={submit}
-              disabled={isSubmitting}
+              disabled={isLoading}
             />
             <View style={styles.haveAccountContainer}>
               <Text style={styles.haveAccountText}>
