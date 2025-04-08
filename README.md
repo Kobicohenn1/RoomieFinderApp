@@ -4,9 +4,9 @@ A mobile app I built to help people find roommates and manage apartment listings
 
 ## Features
 
-- **User Authentication**: Secure login and registration system
+- **User Authentication**: Secure login and registration system with automatic login after registration
 - **Apartment Management**: Create and manage apartment listings with image upload
-- **Profile System**: Customizable user profiles with image support
+- **Profile System**: Customizable user profiles with image support and preference settings
 - **Search & Filter**: Find apartments based on location, price, and preferences
 - **Real-time Updates**: Track apartment status and roommate matches
 
@@ -16,6 +16,7 @@ A mobile app I built to help people find roommates and manage apartment listings
 
 - React Native with Expo
 - React Navigation v6
+- Redux Toolkit for state management
 - Axios for API calls
 - AsyncStorage for local data
 - Custom UI components
@@ -26,14 +27,15 @@ A mobile app I built to help people find roommates and manage apartment listings
 - MongoDB for database
 - JWT for authentication
 - Multer for file uploads
+- Express static file serving
 
 ## Installation
 
 1. Clone and install dependencies:
 
 ```bash
-git clone https://github.com/yourusername/RoomieFinder_app.git
-cd RoomieFinder_app
+git clone https://github.com/Kobicohenn1/RoomieFinderApp.git
+cd RoomieFinderApp
 npm install
 ```
 
@@ -66,28 +68,61 @@ RoomieFinder_app/
 ├── api/                    # Backend API
 │   ├── controllers/       # Route controllers
 │   ├── model/           # Database models
+│   ├── middleware/      # Custom middleware
 │   └── routes/           # API routes
-└── components/           # Reusable components
+├── components/           # Reusable components
+└── store/                # Redux store and slices
 ```
+
+## Authentication Flow
+
+The app uses JWT for authentication with the following flow:
+
+1. User registers with email, password, and username
+2. Backend validates credentials and creates user
+3. User is automatically logged in after registration
+4. JWT token is stored in AsyncStorage for persistent sessions
+5. Protected routes require valid JWT token
+
+## State Management
+
+Redux Toolkit is used for state management with the following structure:
+
+- **Auth Slice**: Handles authentication state (login, registration, token)
+- **Profile Slice**: Manages user profile data
+- **Apartment Slice**: Handles apartment listings and preferences
 
 ## API Endpoints
 
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/users/profile` - Get user profile
-- `POST /api/apartments` - Create apartment listing
+### Authentication
+
+- `POST /api/register` - Register new user
+- `POST /api/login` - User login
+
+### Profile
+
+- `GET /api/users/profile` - Get current user profile
+- `PUT /api/users/:id` - Update user profile
+- `POST /api/profile/upload` - Upload profile picture
+
+### Apartments
+
 - `GET /api/apartments` - Get all apartments
+- `POST /api/apartments` - Create apartment listing
+- `GET /api/apartments/:id` - Get apartment details
 
 ## What I Learned
 
 - Building full-stack mobile applications with React Native
 - Implementing secure authentication and file uploads
 - Designing and building RESTful APIs
-- Managing state and navigation in mobile apps
+- Managing state with Redux Toolkit
 - Working with MongoDB and handling real-world data
+- Implementing proper error handling and user feedback
+- Separating concerns between controllers and routes
 
 ## About This Project
 
-This is a personal project I built while learning mobile development. It demonstrates my ability to work with modern web technologies and build practical applications. While there's room for improvement, I'm proud of what I've accomplished and the skills I've developed.
+This is a personal project I built while learning mobile development. It demonstrates my ability to work with modern web technologies and build practical applications. I've recently improved the authentication flow, added better error handling, and implemented Redux for state management. While there's room for improvement, I'm proud of what I've accomplished and the skills I've developed.
 
 Feel free to check out the code and let me know if you have any questions or suggestions!
