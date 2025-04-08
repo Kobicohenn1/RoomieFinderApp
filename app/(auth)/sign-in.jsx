@@ -15,6 +15,8 @@ import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
 import { Link, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../store/slices/authSlice';
 
 const SignIn = () => {
   const [form, setForm] = useState({
@@ -24,6 +26,8 @@ const SignIn = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { isLoading, error } = useSelector((state) => state.auth);
 
   const submit = async () => {
     if (!form.email || !form.password) {
@@ -31,29 +35,12 @@ const SignIn = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const response = await axios.post(
-        'http://192.168.10.10:3500/api/login', // Ensure this matches the server route
-        form
-      );
-
-      const { token, userId } = response.data; // Ensure your API returns the token and user ID
-      if (!token || !userId) {
-        throw new Error('Token or user ID is missing in the response');
-      }
-
-      await AsyncStorage.setItem('token', token);
-      await AsyncStorage.setItem('userId', userId);
-
+      await dispatch(loginUser(form)).unwrap();
       Alert.alert('Success', 'Logged in successfully');
-      router.push('/home'); // Navigate to the home screen
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', error.message || 'Failed to log in');
-    } finally {
-      setIsSubmitting(false);
+      router.replace('/(tabs)/home'); // Updated navigation path
+    } catch (err) {
+      Alert.alert('Error', error || 'Failed to log in');
     }
   };
 

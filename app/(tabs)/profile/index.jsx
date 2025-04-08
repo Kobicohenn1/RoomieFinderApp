@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import * as ImagePicker from 'expo-image-picker';
 import {
   API_BASE_URL,
   BASE_URL,
@@ -57,6 +58,7 @@ const ProfileContent = () => {
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
   const [hasApartment, setHasApartment] = useState(0);
+  const [uploading, setUploading] = useState(false);
   const router = useRouter();
 
   const handleEditProfile = () => {
@@ -101,6 +103,74 @@ const ProfileContent = () => {
         error.response?.data || error.message
       );
       Alert.alert('Error', 'Failed to update apartment status');
+    }
+  };
+
+  const handleImagePick = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permissionResult.granted === false) {
+        Alert.alert('Error', 'Permission to access camera roll is required!');
+        return;
+      }
+
+      const pickerResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+
+      if (!pickerResult.canceled) {
+        await handleImageUpload(pickerResult.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
+    }
+  };
+
+  const handleImageUpload = async (imageUri) => {
+    try {
+      setUploading(true);
+      const token = await AsyncStorage.getItem('token');
+
+      if (!token) {
+        Alert.alert('Error', 'Please log in again');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('profileImage', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: 'profile.jpg',
+      });
+
+      const response = await axios.post(
+        `${API_BASE_URL}/profile/upload`,
+        formData,
+        {
+          headers: {
+            'x-auth-token': token,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setUserData((prev) => ({
+          ...prev,
+          profileImageUrl: response.data.profileImageUrl,
+        }));
+        Alert.alert('Success', 'Profile picture updated');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Failed to upload profile picture');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -195,17 +265,26 @@ const ProfileContent = () => {
       <View style={styles.content}>
         <Text style={styles.headerText}>Profile</Text>
         <View style={styles.profileSection}>
-          <Image
-            source={
-              userData?.profileImageUrl
-                ? { uri: `${BASE_URL}${userData.profileImageUrl}` }
-                : DEFAULT_PROFILE_IMAGE
-            }
-            style={styles.profileImage}
-            onError={(e) => {
-              console.error('Image loading error:', e.nativeEvent);
-            }}
-          />
+          <TouchableOpacity onPress={handleImagePick} disabled={uploading}>
+            <View style={styles.imageContainer}>
+              <Image
+                source={
+                  userData?.profileImageUrl
+                    ? { uri: `${BASE_URL}${userData.profileImageUrl}` }
+                    : DEFAULT_PROFILE_IMAGE
+                }
+                style={styles.profileImage}
+                onError={(e) => {
+                  console.error('Image loading error:', e.nativeEvent);
+                }}
+              />
+              {uploading && (
+                <View style={styles.uploadingOverlay}>
+                  <ActivityIndicator size="large" color="#fff" />
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
           <Text style={styles.nameText}>
             {userData.name || userData.username || 'User'}
             {userData.age ? `, ${userData.age}` : ''}
@@ -370,6 +449,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  imageContainer: {
+    position: 'relative',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    overflow: 'hidden',
+    marginBottom: 15,
+    alignSelf: 'center',
+  },
+  uploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
