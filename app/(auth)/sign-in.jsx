@@ -61,16 +61,27 @@ const SignIn = () => {
             <FormField
               title="Email"
               value={form.email}
-              handleChangeText={(e) => setForm({ ...form, email: e })}
+              handleChangeText={(e) =>
+                setForm((prevForm) => ({ ...prevForm, email: e }))
+              }
               keyboardType="email-address"
-              placeholder={'Email'}
+              placeholder="Email"
+              textContentType="emailAddress"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             <FormField
               title="Password"
               value={form.password}
-              handleChangeText={(e) => setForm({ ...form, password: e })}
-              placeholder={'Password'}
+              handleChangeText={(e) =>
+                setForm((prevForm) => ({ ...prevForm, password: e }))
+              }
+              placeholder="Password"
               secureTextEntry
+              autoComplete="password"
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             <CustomButton
               title="Sign In"

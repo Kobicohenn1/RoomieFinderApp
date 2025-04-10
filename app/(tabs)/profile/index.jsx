@@ -21,6 +21,9 @@ import {
   DEFAULT_PROFILE_IMAGE,
 } from '../../../constants/config';
 import ApartmentForm from '../../../components/ManageApartment/ApartmentForm';
+import LogoutButton from '../../../components/LogoutButton';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProfileData } from '../../store/slices/ProfileSlice';
 
 // Error boundary component
 class ErrorBoundary extends React.Component {
@@ -53,13 +56,15 @@ class ErrorBoundary extends React.Component {
 }
 
 const ProfileContent = () => {
-  console.log('ProfileContent: Component rendering');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [userData, setUserData] = useState(null);
-  const [hasApartment, setHasApartment] = useState(0);
-  const [uploading, setUploading] = useState(false);
   const router = useRouter();
+  const [uploading, setUploading] = useState(false);
+  const { userData, isLoading, error } = useSelector((state) => state.profile);
+  const hasApartment = userData?.hasApartment ?? false;
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchProfileData());
+  }, [dispatch]);
 
   const handleEditProfile = () => {
     if (!userData) {
@@ -174,82 +179,6 @@ const ProfileContent = () => {
     }
   };
 
-  useEffect(() => {
-    console.log('ProfileContent: useEffect triggered');
-    let isMounted = true;
-
-    const fetchUserData = async () => {
-      try {
-        console.log('ProfileContent: Starting fetchUserData');
-        const token = await AsyncStorage.getItem('token');
-        console.log('ProfileContent: Token retrieved:', token ? 'Yes' : 'No');
-
-        if (!token) {
-          console.log('ProfileContent: No token found');
-          if (isMounted) {
-            setError('Please log in to view your profile');
-            setLoading(false);
-          }
-          return;
-        }
-
-        console.log('ProfileContent: Making API request to:', API_BASE_URL);
-        const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-          headers: { 'x-auth-token': token },
-        });
-        console.log('ProfileContent: API response received:', response.status);
-
-        if (isMounted) {
-          if (response.data) {
-            console.log('ProfileContent: Setting user data');
-            setUserData(response.data);
-            setHasApartment(response.data.hasApartment ? 1 : 0);
-          } else {
-            console.log('ProfileContent: No data in response');
-            setError('No profile data available');
-          }
-        }
-      } catch (err) {
-        console.error('ProfileContent: Error in fetchUserData:', err.message);
-        if (err.response) {
-          console.error('ProfileContent: Server error:', err.response.status);
-          console.error('ProfileContent: Error data:', err.response.data);
-        }
-        if (isMounted) {
-          setError('Could not load profile');
-        }
-      } finally {
-        if (isMounted) {
-          console.log('ProfileContent: Setting loading to false');
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchUserData();
-
-    return () => {
-      console.log('ProfileContent: Cleanup function called');
-      isMounted = false;
-    };
-  }, []);
-
-  console.log('ProfileContent: Current state:', {
-    loading,
-    error,
-    hasUserData: !!userData,
-  });
-
-  if (loading) {
-    console.log('ProfileContent: Rendering loading state');
-    return (
-      <View style={styles.content}>
-        <ActivityIndicator size="large" color="#21b78a" />
-        <Text style={styles.loadingText}>Loading profile...</Text>
-      </View>
-    );
-  }
-
   if (error) {
     console.log('ProfileContent: Rendering error state');
     return (
@@ -259,11 +188,31 @@ const ProfileContent = () => {
     );
   }
 
+  if (isLoading || !userData) {
+    return (
+      <View style={styles.content}>
+        <ActivityIndicator size="large" color="#21b78a" />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </View>
+    );
+  }
+
   console.log('ProfileContent: Rendering main content');
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.content}>
-        <Text style={styles.headerText}>Profile</Text>
+        <View style={styles.headerRow}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerText}>Profile</Text>
+          </View>
+          <View style={styles.logoutButtonContainer}>
+            <LogoutButton />
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
         <View style={styles.profileSection}>
           <TouchableOpacity onPress={handleImagePick} disabled={uploading}>
             <View style={styles.imageContainer}>
@@ -321,7 +270,7 @@ const ProfileContent = () => {
             style={styles.segmentedControl}
             tintColor="#21b78a"
           />
-          {hasApartment === 1 && (
+          {hasApartment && (
             <View style={styles.apartmentFormContainer}>
               <ApartmentForm />
             </View>
@@ -333,7 +282,6 @@ const ProfileContent = () => {
 };
 
 const ProfileScreen = () => {
-  console.log('ProfileScreen: Wrapper component rendering');
   return (
     <ErrorBoundary>
       <SafeAreaView style={styles.container}>
@@ -356,10 +304,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 15,
+  },
+  headerTextContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  logoutButtonContainer: {
+    position: 'absolute',
+    right: 20,
+  },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
   },
   profileSection: {
     alignItems: 'center',
@@ -468,6 +431,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 20,
+    marginBottom: 15,
   },
 });
 

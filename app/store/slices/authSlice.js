@@ -74,9 +74,21 @@ export const loginUser = createAsyncThunk(
 
       return { token, userId };
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Faild to log in'
-      );
+      return rejectWithValue(error.message || 'Faild to log in');
+    }
+  }
+);
+
+//Async Thunk for the logout
+export const logout = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('userId');
+      return { success: true };
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to logout');
     }
   }
 );
@@ -124,6 +136,23 @@ const authSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(logout.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(logout.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+        if (action.payload.success) {
+          state.isLoggedIn = false;
+          state.token = null;
+          state.userId = null;
+        }
+      })
+      .addCase(logout.rejected, (state, action) => {
+        state.error = action.payload;
+        state.isLoading = false;
       });
   },
 });
