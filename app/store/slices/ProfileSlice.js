@@ -42,6 +42,37 @@ export const fetchProfileData = createAsyncThunk(
   }
 );
 
+export const setApartmentStatus = createAsyncThunk(
+  'profile/setApartmentStatus',
+  async (selectedIndex, { rejectWithValue }) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        return rejectWithValue('Authentication token was not found');
+      }
+      const response = await axios.put(
+        `${API_BASE_URL}/profile/update-profile`,
+        {
+          updates: {
+            hasApartment: selectedIndex === 1,
+          },
+        },
+        {
+          headers: {
+            'x-auth-token': token,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      return selectedIndex === 1;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update apartment status'
+      );
+    }
+  }
+);
+
 const profileSlice = createSlice({
   name: 'profile',
   reducers: {
@@ -52,6 +83,7 @@ const profileSlice = createSlice({
   initialState,
   extraReducers: (builder) => {
     builder
+      //fetch profile
       .addCase(fetchProfileData.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -66,6 +98,16 @@ const profileSlice = createSlice({
       })
       .addCase(fetchProfileData.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload;
+      })
+      //set apartment status
+      .addCase(setApartmentStatus.fulfilled, (state, action) => {
+        if (state.userData) {
+          state.userData.hasApartment = action.payload;
+        }
+        state.hasApartment = action.payload;
+      })
+      .addCase(setApartmentStatus.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

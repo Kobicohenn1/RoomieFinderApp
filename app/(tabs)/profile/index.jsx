@@ -23,7 +23,10 @@ import {
 import ApartmentForm from '../../../components/ManageApartment/ApartmentForm';
 import LogoutButton from '../../../components/LogoutButton';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProfileData } from '../../store/slices/ProfileSlice';
+import {
+  fetchProfileData,
+  setApartmentStatus,
+} from '../../store/slices/ProfileSlice';
 
 // Error boundary component
 class ErrorBoundary extends React.Component {
@@ -76,37 +79,8 @@ const ProfileContent = () => {
 
   const handleHasApartment = async (selectedIndex) => {
     try {
-      const token = await AsyncStorage.getItem('token');
-
-      if (!token) {
-        Alert.alert('Error', 'Please log in again');
-        return;
-      }
-
-      console.log('Updating apartment status:', selectedIndex);
-      const response = await axios.put(
-        `${API_BASE_URL}/profile/update-profile`,
-        {
-          updates: { hasApartment: selectedIndex === 1 },
-        },
-        {
-          headers: {
-            'x-auth-token': token,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      console.log('Update response:', response.data);
-      if (response.status === 200) {
-        setHasApartment(selectedIndex);
-        setUserData((prev) => ({ ...prev, hasApartment: selectedIndex === 1 }));
-      }
+      await dispatch(setApartmentStatus(selectedIndex));
     } catch (error) {
-      console.error(
-        'Error updating apartment status:',
-        error.response?.data || error.message
-      );
       Alert.alert('Error', 'Failed to update apartment status');
     }
   };
@@ -259,13 +233,7 @@ const ProfileContent = () => {
             selectedIndex={hasApartment}
             onChange={(event) => {
               const newIndex = event.nativeEvent.selectedSegmentIndex;
-              setHasApartment(newIndex);
-              handleHasApartment(newIndex).catch((error) => {
-                console.error('Error updating apartment status:', error);
-                // Revert the UI state if the API call fails
-                setHasApartment(hasApartment);
-                Alert.alert('Error', 'Failed to update apartment status');
-              });
+              handleHasApartment(newIndex);
             }}
             style={styles.segmentedControl}
             tintColor="#21b78a"
