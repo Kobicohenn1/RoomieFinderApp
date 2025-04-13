@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchProfileData,
   setApartmentStatus,
+  handleImageUpload,
 } from '../../store/slices/ProfileSlice';
 
 // Error boundary component
@@ -102,54 +103,11 @@ const ProfileContent = () => {
       });
 
       if (!pickerResult.canceled) {
-        await handleImageUpload(pickerResult.assets[0].uri);
+        await dispatch(handleImageUpload(pickerResult.assets[0].uri)).unwrap();
       }
     } catch (error) {
       console.error('Error picking image:', error);
       Alert.alert('Error', 'Failed to pick image');
-    }
-  };
-
-  const handleImageUpload = async (imageUri) => {
-    try {
-      setUploading(true);
-      const token = await AsyncStorage.getItem('token');
-
-      if (!token) {
-        Alert.alert('Error', 'Please log in again');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('profileImage', {
-        uri: imageUri,
-        type: 'image/jpeg',
-        name: 'profile.jpg',
-      });
-
-      const response = await axios.post(
-        `${API_BASE_URL}/profile/upload`,
-        formData,
-        {
-          headers: {
-            'x-auth-token': token,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        setUserData((prev) => ({
-          ...prev,
-          profileImageUrl: response.data.profileImageUrl,
-        }));
-        Alert.alert('Success', 'Profile picture updated');
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload profile picture');
-    } finally {
-      setUploading(false);
     }
   };
 

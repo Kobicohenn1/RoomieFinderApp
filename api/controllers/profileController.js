@@ -22,9 +22,6 @@ const uploadProfilePicture = async (req, res) => {
     user.profileImageUrl = profileImageUrl;
     await user.save();
 
-    // Log the URL for debugging
-    console.log('Profile image URL:', profileImageUrl);
-
     res.json({
       msg: 'Profile picture updated',
       profileImageUrl: user.profileImageUrl,

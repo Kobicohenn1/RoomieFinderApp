@@ -8,8 +8,43 @@ const initialState = {
   userData: null,
   hasApartment: false,
   isLoading: false,
+  isUploading: false,
   error: null,
 };
+
+export const handleImageUpload = createAsyncThunk(
+  'profile/imageUpload',
+  async (imageUri, { rejectWithValue }) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        return rejectWithValue('Authentication Token was not found');
+      }
+      const formData = new FormData();
+      formData.append('profileImage', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: 'profileImage',
+      });
+      const response = await axios.post(
+        `${API_BASE_URL}/profile/upload`,
+        formData,
+        {
+          headers: {
+            'x-auth-token': token,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      console.log('Image upload response:', response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to upload image'
+      );
+    }
+  }
+);
 
 export const fetchProfileData = createAsyncThunk(
   'profile/fetchProfileData',
@@ -108,6 +143,23 @@ const profileSlice = createSlice({
         state.hasApartment = action.payload;
       })
       .addCase(setApartmentStatus.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      //image uploading
+      .addCase(handleImageUpload.pending, (state) => {
+        state.isUploading = true;
+        state.error = null;
+      })
+      .addCase(handleImageUpload.fulfilled, (state, action) => {
+        state.isUploading = false;
+        state.error = null;
+
+        if (state.userData) {
+          state.userData.profileImageUrl = action.payload.profileImageUrl;
+        }
+      })
+      .addCase(handleImageUpload.rejected, (state, action) => {
+        state.isUploading = false;
         state.error = action.payload;
       });
   },
