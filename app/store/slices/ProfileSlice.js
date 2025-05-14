@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { API_BASE_URL } from '../../../constants';
 import axios from 'axios';
+import { profileService } from '../../services/api/profile';
 
 //initial State for the Profile
 const initialState = {
@@ -16,28 +17,7 @@ export const handleImageUpload = createAsyncThunk(
   'profile/imageUpload',
   async (imageUri, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        return rejectWithValue('Authentication Token was not found');
-      }
-      const formData = new FormData();
-      formData.append('profileImage', {
-        uri: imageUri,
-        type: 'image/jpeg',
-        name: 'profileImage',
-      });
-      const response = await axios.post(
-        `${API_BASE_URL}/profile/upload`,
-        formData,
-        {
-          headers: {
-            'x-auth-token': token,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      console.log('Image upload response:', response.data);
-      return response.data;
+      return await profileService.uploadProfileImage(imageUri);
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to upload image'
@@ -49,16 +29,8 @@ export const handleImageUpload = createAsyncThunk(
 export const fetchProfileData = createAsyncThunk(
   'profile/fetchProfileData',
   async (_, { rejectWithValue }) => {
-    console.log('hey');
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        return rejectWithValue('Authentication token not found');
-      }
-      const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-        headers: { 'x-auth-token': token },
-      });
-      return response.data;
+      return await profileService.getProfile();
     } catch (error) {
       // handle all types of errors
       if (error.response) {
@@ -81,25 +53,7 @@ export const setApartmentStatus = createAsyncThunk(
   'profile/setApartmentStatus',
   async (selectedIndex, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        return rejectWithValue('Authentication token was not found');
-      }
-      const response = await axios.put(
-        `${API_BASE_URL}/profile/update-profile`,
-        {
-          updates: {
-            hasApartment: selectedIndex === 1,
-          },
-        },
-        {
-          headers: {
-            'x-auth-token': token,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      return selectedIndex === 1;
+      return await profileService.updateApartmentSatatus(selectedIndex === 1);
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to update apartment status'
@@ -126,8 +80,6 @@ const profileSlice = createSlice({
       .addCase(fetchProfileData.fulfilled, (state, action) => {
         state.isLoading = false;
         state.error = null;
-        console.log('🔁 fulfilled payload:', action.payload);
-
         state.userData = action.payload;
         state.hasApartment = action.payload.hasApartment;
       })

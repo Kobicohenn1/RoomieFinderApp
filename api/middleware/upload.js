@@ -10,6 +10,7 @@ const createUploadsFolder = (folder) => {
 
 const storage = multer.diskStorage({
   destination: (req, res, cb) => {
+    //console.log('DESTINATION baseUrl:', req.baseUrl);
     let folder = 'uploads';
     if (req.baseUrl.includes('profile')) {
       folder += '/profiles';

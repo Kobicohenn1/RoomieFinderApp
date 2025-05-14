@@ -11,8 +11,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import * as ImagePicker from 'expo-image-picker';
 import {

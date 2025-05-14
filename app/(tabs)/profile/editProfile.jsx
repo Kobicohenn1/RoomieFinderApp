@@ -7,14 +7,28 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
-import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { CITIES } from '../../../constants/cities';
 import { emojis } from '../../../constants/emojis';
+
+const DEFAULT_PROFILE = {
+  gender: '',
+  occupation: '',
+  personality: '',
+  lifestyle: '',
+  smokingHabit: '',
+  pets: '',
+  music: [],
+  sports: [],
+  movieGenres: [],
+  city: '',
+  age: '',
+};
 
 const options = {
   gender: ['Female', 'Male', 'Non-binary'],
@@ -39,92 +53,88 @@ const options = {
 const ages = Array.from({ length: 83 }, (_, i) => i + 18);
 
 const EditProfileScreen = () => {
-  const [profile, setProfile] = useState({
-    gender: '',
-    occupation: '',
-    personality: '',
-    lifestyle: '',
-    smokingHabit: '',
-    pets: '',
-    music: [],
-    sports: [],
-    movieGenres: [],
-    city: '',
-    age: '',
-  });
-
+  const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [introduceYourself, setIntroduceYourself] = useState('');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ success: '', error: '' });
-  const [petOptions, setPetOptions] = useState([
-    'Dog',
-    'Cat',
-    'Others',
-    'No Pets',
-  ]); // Default options
   const scrollViewRef = useRef();
   const router = useRouter();
 
   useEffect(() => {
-    const fetchProfileAndPetOptions = async () => {
+    const fetchProfile = async () => {
       try {
         const userId = await AsyncStorage.getItem('userId');
         const token = await AsyncStorage.getItem('token');
         if (!userId || !token) throw new Error('Authentication error');
 
-        // Fetch user profile
         const profileResponse = await axios.get(
           `http://192.168.10.10:3500/api/users/${userId}`,
           {
             headers: { 'x-auth-token': token },
           }
         );
-        const profileData = profileResponse.data;
+
+        const profileData = profileResponse.data || {};
         setProfile({
-          gender: profileData.gender || '',
-          occupation: profileData.occupation || '',
-          personality: profileData.personality || '',
-          lifestyle: profileData.lifestyle || '',
-          smokingHabit: profileData.smokingHabit || '',
-          pets: profileData.pets || '',
-          music: profileData.music || [],
-          sports: profileData.sports || [],
-          movieGenres: profileData.movieGenres || [],
-          city: profileData.city || '',
-          age: profileData.age || '',
+          gender: profileData.gender || DEFAULT_PROFILE.gender,
+          occupation: profileData.occupation || DEFAULT_PROFILE.occupation,
+          personality: profileData.personality || DEFAULT_PROFILE.personality,
+          lifestyle: profileData.lifestyle || DEFAULT_PROFILE.lifestyle,
+          smokingHabit:
+            profileData.smokingHabit || DEFAULT_PROFILE.smokingHabit,
+          pets: profileData.pets || DEFAULT_PROFILE.pets,
+          music: Array.isArray(profileData.music)
+            ? profileData.music
+            : DEFAULT_PROFILE.music,
+          sports: Array.isArray(profileData.sports)
+            ? profileData.sports
+            : DEFAULT_PROFILE.sports,
+          movieGenres: Array.isArray(profileData.movieGenres)
+            ? profileData.movieGenres
+            : DEFAULT_PROFILE.movieGenres,
+          city: profileData.city || DEFAULT_PROFILE.city,
+          age: profileData.age || DEFAULT_PROFILE.age,
         });
         setIntroduceYourself(profileData.introduceYourself || '');
       } catch (error) {
-        setMessage({ success: '', error: error.message });
+        setMessage({ success: '', error: 'Failed to load profile' });
       } finally {
         setLoading(false);
       }
     };
-    fetchProfileAndPetOptions();
+
+    fetchProfile();
   }, []);
 
   const handleSubmit = async () => {
-    const updates = {
-      gender: profile.gender,
-      occupation: profile.occupation,
-      personality: profile.personality,
-      lifestyle: profile.lifestyle,
-      smokingHabit: profile.smokingHabit,
-      pets: profile.pets,
-      introduceYourself: introduceYourself,
-      music: profile.music,
-      sports: profile.sports,
-      movieGenres: profile.movieGenres,
-      city: profile.city,
-      age: profile.age,
-    };
-
     try {
       const userId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('token');
       if (!userId || !token) throw new Error('Authentication error');
+
+      const updates = {
+        gender: profile.gender || DEFAULT_PROFILE.gender,
+        occupation: profile.occupation || DEFAULT_PROFILE.occupation,
+        personality: profile.personality || DEFAULT_PROFILE.personality,
+        lifestyle: profile.lifestyle || DEFAULT_PROFILE.lifestyle,
+        smokingHabit: profile.smokingHabit || DEFAULT_PROFILE.smokingHabit,
+        pets: profile.pets || DEFAULT_PROFILE.pets,
+        introduceYourself: introduceYourself || '',
+        music: Array.isArray(profile.music)
+          ? profile.music
+          : DEFAULT_PROFILE.music,
+        sports: Array.isArray(profile.sports)
+          ? profile.sports
+          : DEFAULT_PROFILE.sports,
+        movieGenres: Array.isArray(profile.movieGenres)
+          ? profile.movieGenres
+          : DEFAULT_PROFILE.movieGenres,
+        city: profile.city || DEFAULT_PROFILE.city,
+        age: profile.age || DEFAULT_PROFILE.age,
+      };
+
       const response = await axios.put(
-        'http://192.168.10.10:3500/api/profile/update-profile',
+        'http://192.168.10.10:3500/api/profile',
         { userId, updates },
         {
           headers: {
@@ -133,6 +143,7 @@ const EditProfileScreen = () => {
           },
         }
       );
+
       if (response.status === 200) {
         setMessage({ success: 'Profile updated successfully', error: '' });
         router.push('/profile');
@@ -140,7 +151,7 @@ const EditProfileScreen = () => {
         setMessage({ success: '', error: 'Failed to update profile' });
       }
     } catch (error) {
-      setMessage({ success: '', error: error.message });
+      setMessage({ success: '', error: 'Failed to update profile' });
     }
   };
 
@@ -152,19 +163,24 @@ const EditProfileScreen = () => {
   };
 
   const toggleOption = (category, option) => {
-    setProfile((prev) => ({
-      ...prev,
-      [category]: prev[category].includes(option)
-        ? prev[category].filter((item) => item !== option)
-        : [...prev[category], option],
-    }));
+    setProfile((prev) => {
+      const currentValue = prev[category];
+      if (!Array.isArray(currentValue)) return prev;
+
+      return {
+        ...prev,
+        [category]: currentValue.includes(option)
+          ? currentValue.filter((item) => item !== option)
+          : [...currentValue, option],
+      };
+    });
   };
 
   const renderOption = (category, option) => {
     const isMultiSelect = Array.isArray(profile[category]);
-    const emoji = emojis[category] ? emojis[category][option] : null;
+    const emoji = emojis[category]?.[option] || '';
     const isSelected = isMultiSelect
-      ? profile[category].includes(option)
+      ? profile[category]?.includes(option)
       : profile[category] === option;
 
     return (
@@ -193,8 +209,16 @@ const EditProfileScreen = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#21b78a" />
+      </View>
+    );
+  }
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.container}
         automaticallyAdjustKeyboardInsets={true}
@@ -214,7 +238,7 @@ const EditProfileScreen = () => {
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </Text>
                 <View style={styles.radioContainer}>
-                  {options[category].map((opt) => renderOption(category, opt))}
+                  {options[category]?.map((opt) => renderOption(category, opt))}
                 </View>
               </View>
             )
@@ -226,7 +250,7 @@ const EditProfileScreen = () => {
                 {category.charAt(0).toUpperCase() + category.slice(1)}
               </Text>
               <View style={styles.optionsContainer}>
-                {options[category].map((option) =>
+                {options[category]?.map((option) =>
                   renderOption(category, option)
                 )}
               </View>
@@ -236,7 +260,7 @@ const EditProfileScreen = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Smoking Habit</Text>
             <View style={styles.radioContainer}>
-              {options.smokingHabit.map((opt) =>
+              {options.smokingHabit?.map((opt) =>
                 renderOption('smokingHabit', opt)
               )}
             </View>
@@ -245,35 +269,36 @@ const EditProfileScreen = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Do You Have Pets?</Text>
             <View style={styles.radioContainer}>
-              {options.pets.map((opt) => renderOption('pets', opt))}
+              {options.pets?.map((opt) => renderOption('pets', opt))}
             </View>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>City</Text>
             <Picker
-              selectedValue={profile.city}
+              selectedValue={profile.city || ''}
               onValueChange={(itemValue) =>
                 setProfile((prev) => ({ ...prev, city: itemValue }))
               }
             >
               <Picker.Item label="Select a city" value="" />
-              {CITIES.map((city) => (
+              {CITIES?.map((city) => (
                 <Picker.Item key={city} label={city} value={city} />
               ))}
             </Picker>
           </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Age</Text>
             <Picker
-              selectedValue={profile.age}
+              selectedValue={profile.age || ''}
               onValueChange={(itemValue) =>
                 setProfile((prev) => ({ ...prev, age: itemValue }))
               }
             >
-              <Picker.Item label="Select a age" value="" />
-              {ages.map((age) => (
-                <Picker.Item key={age} label={age} value={age} />
+              <Picker.Item label="Select an age" value="" />
+              {ages?.map((age) => (
+                <Picker.Item key={age} label={age.toString()} value={age} />
               ))}
             </Picker>
           </View>
@@ -288,11 +313,11 @@ const EditProfileScreen = () => {
             onChangeText={setIntroduceYourself}
             value={introduceYourself}
             onFocus={() => {
-              scrollViewRef.current.scrollToEnd({ animated: true });
+              scrollViewRef.current?.scrollToEnd({ animated: true });
             }}
           />
           <Text style={styles.charCount}>
-            {400 - introduceYourself.length} characters left
+            {400 - (introduceYourself?.length || 0)} characters left
           </Text>
           <TouchableOpacity style={styles.updateButton} onPress={handleSubmit}>
             <Text style={styles.updateButtonText}>Update Profile</Text>
@@ -304,6 +329,15 @@ const EditProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     flexGrow: 1,
     padding: 20,
@@ -325,33 +359,21 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     flexWrap: 'wrap',
   },
-  radioOption: {
-    backgroundColor: '#F0F0F0',
-    paddingVertical: 10, // Dynamic padding for vertical space
-    paddingRight: 3, // Dynamic padding for horizontal space
-    margin: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    flexDirection: 'row', // Row direction for icon + text
-    alignItems: 'center', // Vertically center items
-    justifyContent: 'center', // Center items horizontally
-  },
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   option: {
     backgroundColor: '#F0F0F0',
-    paddingVertical: 10, // Dynamic padding for vertical space
-    paddingRight: 5, // Dynamic padding for horizontal space
+    paddingVertical: 10,
+    paddingRight: 5,
     margin: 8,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#ccc',
-    flexDirection: 'row', // Row direction for icon + text
-    alignItems: 'center', // Vertically center items
-    justifyContent: 'center', // Center items horizontally
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   optionSelected: {
     backgroundColor: '#fff',
@@ -359,7 +381,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   optionUnselected: {
-    backgroundColor: '#D3D3D3', // Darker background for unselected options
+    backgroundColor: '#D3D3D3',
   },
   optionText: {
     fontSize: 15,
@@ -368,7 +390,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   optionTextUnselected: {
-    color: '#777', // Darker text color for unselected options
+    color: '#777',
   },
   updateButton: {
     backgroundColor: '#21b78a',

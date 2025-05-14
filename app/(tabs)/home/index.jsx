@@ -59,7 +59,15 @@ const Home = () => {
 
   const fetchProfiles = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/profiles`);
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token missing');
+      }
+      const response = await axios.get(`${API_BASE_URL}/users/profile/browse`, {
+        headers: {
+          'x-auth-token': token,
+        },
+      });
       if (!response.data) {
         throw new Error('No profiles data received');
       }
@@ -90,21 +98,26 @@ const Home = () => {
       }
 
       if (userResponse.data.filters) {
-        const filterResponse = await axios.get(
-          `${API_BASE_URL}/filters/${userResponse.data.filters}`,
-          {
-            headers: {
-              'x-auth-token': token,
-            },
+        try {
+          const filterResponse = await axios.get(
+            `${API_BASE_URL}/filters/${userResponse.data.filters}`,
+            {
+              headers: {
+                'x-auth-token': token,
+              },
+            }
+          );
+          if (filterResponse.data) {
+            setFilters(filterResponse.data);
           }
-        );
-        if (filterResponse.data) {
-          setFilters(filterResponse.data);
+        } catch (filterError) {
+          setFilters(null);
         }
+      } else {
+        setFilters(null);
       }
     } catch (error) {
-      console.error('Error fetching filters:', error);
-      throw new Error('Failed to fetch filters');
+      setFilters(null);
     }
   };
 

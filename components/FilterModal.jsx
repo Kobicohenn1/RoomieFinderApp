@@ -39,20 +39,28 @@ const FilterModal = ({ isVisible, onClose, onFiltersApplied }) => {
         );
 
         if (userResponse.data.filters) {
-          const filterResponse = await axios.get(
-            `http://192.168.10.10:3500/api/filters/${userResponse.data.filters}`,
-            {
-              headers: {
-                'x-auth-token': token,
-              },
-            }
-          );
+          try {
+            const filterResponse = await axios.get(
+              `http://192.168.10.10:3500/api/filters/${userResponse.data.filters}`,
+              {
+                headers: {
+                  'x-auth-token': token,
+                },
+              }
+            );
 
-          populateFilterData(filterResponse.data);
+            if (filterResponse.data) {
+              populateFilterData(filterResponse.data);
+            }
+          } catch (filterError) {
+            console.error('Error fetching filter data:', filterError);
+            // Continue with default values if filter fetch fails
+          }
         }
+        // If no filters exist, continue with default values
       } catch (error) {
         console.error('Error fetching filter data', error.message);
-        Alert.alert('Error', 'Failed to fetch filter data');
+        // Don't show alert, just continue with default values
       }
     };
     fetchFilterData();

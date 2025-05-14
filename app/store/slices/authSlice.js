@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { API_BASE_URL } from '../../../constants';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authService } from '../../services/api/auth';
 
 const initialState = {
   user: null,
@@ -17,40 +18,18 @@ const initialState = {
 export const registerUser = createAsyncThunk(
   'auth/register',
   async ({ username, email, password }, { rejectWithValue }) => {
-    let registerResponse;
     try {
-      registerResponse = await axios.post(`${API_BASE_URL}/register`, {
+      const registerResponse = await authService.register({
         username,
         email,
         password,
       });
+      const loginData = await authService.login({ email, password });
+      return { ...registerData, ...loginData, isLoggedIn: true };
     } catch (error) {
       return rejectWithValue(
-        error.response?.data.message || 'Registration failed'
+        error.response?.data?.message || 'Registration failed'
       );
-    }
-    try {
-      const loginResponse = await axios.post(`${API_BASE_URL}/login`, {
-        email,
-        password,
-      });
-      const { token, userId } = loginResponse.data;
-
-      if (!token || !userId) {
-        return rejectWithValue('Token or user id missing in the response');
-      }
-
-      await AsyncStorage.setItem('token', token);
-      await AsyncStorage.setItem('userId', userId);
-
-      return {
-        registerData: registerResponse.data,
-        token,
-        userId,
-        isLoggedIn: true,
-      };
-    } catch (error) {
-      return rejectWithValue('Login after registration failed');
     }
   }
 );
@@ -60,19 +39,7 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/login`, {
-        email,
-        password,
-      });
-      const { token, userId } = response.data;
-      if (!token || !userId) {
-        return rejectWithValue('Token or user Id is missing in the response');
-      }
-
-      await AsyncStorage.setItem('token', token);
-      await AsyncStorage.setItem('userId', userId);
-
-      return { token, userId };
+      return await authService.login({ email, password });
     } catch (error) {
       return rejectWithValue(error.message || 'Faild to log in');
     }
@@ -84,9 +51,7 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('userId');
-      return { success: true };
+      return await authService.logout();
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to logout');
     }

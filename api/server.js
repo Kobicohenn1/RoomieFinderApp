@@ -26,12 +26,9 @@ app.use(
 );
 
 // Route Files - Order matters for route matching
-app.use('/api/users', require('./routes/user')); // This should handle /profile
 app.use('/api', require('./routes/register'));
 app.use('/api', require('./routes/auth'));
-app.use('/api/profile', require('./routes/profile'));
-app.use('/api/profile', require('./routes/update-profile'));
-app.use('/api', require('./routes/profiles'));
+app.use('/api/users', require('./routes/user'));
 app.use('/api/apartment', require('./routes/apartmentRoutes'));
 app.use('/api/filters', require('./routes/filtersRoutes'));
 app.use('/api/match', require('./routes/matchRoutes'));

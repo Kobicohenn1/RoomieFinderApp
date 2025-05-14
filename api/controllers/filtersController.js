@@ -50,14 +50,18 @@ exports.uploadFiltersDetails = async (req, res) => {
 exports.getFilterData = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ msg: 'Filter ID is required' });
+    }
+
     const filter = await Filter.findById(id);
 
     if (!filter) {
-      return res.status(404).json('Filter not found');
+      return res.status(404).json({ msg: 'Filter not found' });
     }
     return res.json(filter);
   } catch (error) {
-    console.error('Server Error', error.message);
     res.status(500).json({ msg: 'Server Error' });
   }
 };
